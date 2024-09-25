@@ -15,7 +15,6 @@ const FailedExpense = ({ index, expense, failed, stats, expenses, onSave }) => {
       expense.info.date !== "Invalid Date" ? dayjs(expense.info.date) : dayjs(),
     ref: expense.info.ref,
   });
-  const [errors, setErrors] = useState({});
 
   const handleChange = ({ target }) => {
     setForm((prev) => ({

@@ -4,6 +4,7 @@ import Reciepts from "./components/reciepts";
 import ExpensesTable from "./components/expenseTable";
 import StatusComponent from "./components/status";
 import FailedExpenseTable from "./components/failedExpenseTable";
+import ExpenseWorker from "./utils/expenseWorker";
 
 const App = () => {
   const [stage, setStage] = useState(0);
@@ -28,30 +29,18 @@ const App = () => {
   };
 
   const handleExport = () => {
+    const expenseWorker = new ExpenseWorker();
     setStatus({ on: true, type: "LOADING", message: "Uploading Expenses" });
-    fetch("http://localhost:3001/api/expenses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(expenses),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setStatus({
-          on: true,
-          type: "SUCCESS",
-          message: data.message,
-          action: () => setStage(0),
-          actionTitle: "Back Home",
-        });
+    expenseWorker
+      .export(expenses)
+      .then((res) => {
+        setStatus({ on: true, type: "SUCCESS", message: "Expenses Uploaded" });
       })
-      .catch((error) => {
+      .catch((err) => {
         setStatus({
           on: true,
           type: "ERROR",
-          message: `Error Uploading Expenses ${error.message}`,
-          action: () => setStage(0),
+          message: `Error Uploading Expenses: ${err.message}`,
         });
       });
   };

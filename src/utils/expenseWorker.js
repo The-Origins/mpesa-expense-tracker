@@ -1,7 +1,8 @@
+import * as XLSX from "xlsx";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
-class RecieptWorker {
+class ExpenseWorker {
   retriveInfo(receipt) {
     dayjs.extend(customParseFormat);
     // Regular expressions for extracting each part
@@ -110,7 +111,7 @@ class RecieptWorker {
       ) {
         let info = this.retriveInfo(receipt);
         if (info) {
-          if (info.amount === null) {
+          if (info.amount === null || isNaN(info.amount)) {
             failed.push({ receipt, info });
             continue;
           }
@@ -166,6 +167,31 @@ class RecieptWorker {
       expenses,
     };
   }
+
+  async export(expenses) {
+    return new Promise((resolve, reject) => {
+      try {
+        const workbook = XLSX.utils.book_new();
+        Object.keys(expenses).forEach((year) => {
+          Object.keys(expenses[year]).forEach((month) => {
+            const worksheet = XLSX.utils.json_to_sheet(expenses[year][month]);
+
+            XLSX.utils.book_append_sheet(
+              workbook,
+              worksheet,
+              `${year}-${month}`
+            );
+          });
+        });
+
+        resolve(
+          XLSX.writeFile(workbook, "expenses.xlsx", { bookType: "xlsx" })
+        );
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
-export default RecieptWorker;
+export default ExpenseWorker;

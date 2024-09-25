@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import RecieptWorker from "../utils/recieptWorker";
+import ExpenseWorker from "../utils/expenseWorker";
 
 const FailedExpense = ({ index, expense, failed, stats, expenses, onSave }) => {
   const theme = useTheme();
@@ -31,10 +31,10 @@ const FailedExpense = ({ index, expense, failed, stats, expenses, onSave }) => {
   };
 
   const handleSave = () => {
-    const receiptWorker = new RecieptWorker();
+    const expenseWorker = new ExpenseWorker()
     let newFailed = [...failed];
     newFailed.splice(index, 1);
-    const info = receiptWorker.addExpense(stats, expenses, form);
+    const info = expenseWorker.addExpense(stats, expenses, form);
     onSave({ ...info, failed: newFailed });
   };
 

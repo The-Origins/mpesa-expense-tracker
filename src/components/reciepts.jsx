@@ -1,6 +1,6 @@
 import { Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
-import RecieptWorker from "../utils/recieptWorker";
+import ExpenseWorker from "../utils/expenseWorker";
 
 const Reciepts = ({ onSubmit }) => {
   const [receipts, setReceipts] = useState("");
@@ -11,8 +11,8 @@ const Reciepts = ({ onSubmit }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const recieptWorker = new RecieptWorker();
-    onSubmit(recieptWorker.fetchExpenses(receipts));
+    const expenseWorker = new ExpenseWorker()
+    onSubmit(expenseWorker.fetchExpenses(receipts));
   };
 
   return (

@@ -1,6 +1,7 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import ExpenseWorker from "../utils/expenseWorker";
+import samples from "../lib/samples";
 
 const Reciepts = ({ onSubmit }) => {
   const [receipts, setReceipts] = useState("");
@@ -11,7 +12,7 @@ const Reciepts = ({ onSubmit }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const expenseWorker = new ExpenseWorker()
+    const expenseWorker = new ExpenseWorker();
     onSubmit(expenseWorker.fetchExpenses(receipts));
   };
 
@@ -26,7 +27,21 @@ const Reciepts = ({ onSubmit }) => {
       }}
       onSubmit={handleSubmit}
     >
-      <Typography width={"100%"}>Enter Receipts</Typography>
+      <Box
+        width={"100%"}
+        display={"flex"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+      >
+        <Typography width={"100%"}>Enter Receipts</Typography>
+        <Button
+          variant="outlined"
+          onClick={() => setReceipts(samples)}
+          size="large"
+        >
+          Loadsamples
+        </Button>
+      </Box>
       <TextField
         label="Receipts"
         value={receipts}

@@ -34,13 +34,19 @@ const App = () => {
     expenseWorker
       .export(expenses)
       .then((res) => {
-        setStatus({ on: true, type: "SUCCESS", message: "Expenses Uploaded" });
+        setStatus({
+          on: true,
+          type: "SUCCESS",
+          message: "Expenses Uploaded",
+          action: () => setStage(0),
+        });
       })
       .catch((err) => {
         setStatus({
           on: true,
           type: "ERROR",
           message: `Error Uploading Expenses: ${err.message}`,
+          action: () => setStage(0),
         });
       });
   };

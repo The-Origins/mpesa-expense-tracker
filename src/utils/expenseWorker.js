@@ -32,7 +32,7 @@ class ExpenseWorker {
       ? transactionCostMatch
         ? Number(transactionCostMatch[1].replace(/,/g, "")) +
           Number(amountMatch[1].replace(/,/g, ""))
-        : amountMatch[1]
+        : Number(amountMatch[1].replace(/,/g, ""))
       : null;
 
     const fromMatch = receipt.match(fromToBalanceRegex);
@@ -107,7 +107,8 @@ class ExpenseWorker {
 
       if (
         !receipt.includes("received") &&
-        !receipt.includes("was not successful")
+        !receipt.includes("was not successful") &&
+        !receipt.includes("Your account balance was")
       ) {
         let info = this.retriveInfo(receipt);
         if (info) {

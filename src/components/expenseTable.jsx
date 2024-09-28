@@ -6,7 +6,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Cell from "./cell.jsx";
 import ExpenseComponent from "./expenseComponent.jsx";
 import StatsBar from "./statsBar.jsx";
@@ -17,6 +17,8 @@ const ExpensesTable = ({
   failed,
   expenses,
   setExpenses,
+  suggestions,
+  setSuggestions,
   handleExport,
 }) => {
   const theme = useTheme();
@@ -24,30 +26,7 @@ const ExpensesTable = ({
   const [selectedMonth, setSelectedMonth] = useState(
     Object.keys(expenses[selectedYear])[0]
   );
-  const [suggestions, setSuggestions] = useState({
-    expense: [],
-    receipient: [],
-    amount: [],
-    date: [],
-    ref: [],
-  });
   const [expenseUpdates, setExpenseUpdates] = useState({});
-
-  useEffect(() => {
-    expenses[selectedYear][selectedMonth].forEach((expense) => {
-      Object.keys(expense).forEach((key) => {
-        setSuggestions((prev) => {
-          if (!prev[key].includes(String(expense[key]))) {
-            return {
-              ...prev,
-              [key]: [...prev[key], String(expense[key])],
-            };
-          }
-          return prev;
-        });
-      });
-    });
-  }, [expenses, selectedYear, selectedMonth]);
 
   const onExport = () => {
     updateExpenses();
@@ -235,7 +214,13 @@ const ExpensesTable = ({
       >
         {expenses[selectedYear][selectedMonth].map((expense, index) => (
           <ExpenseComponent
-            {...{ index, expense, setExpenseUpdates, suggestions }}
+            {...{
+              index,
+              expense,
+              setExpenseUpdates,
+              suggestions,
+              setSuggestions,
+            }}
           />
         ))}
       </Box>

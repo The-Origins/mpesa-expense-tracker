@@ -12,11 +12,13 @@ const App = () => {
   const [expenses, setExpenses] = useState({});
   const [stats, setStats] = useState({});
   const [failed, setFailed] = useState([]);
+  const [suggestions, setSuggestions] = useState({})
 
   const updateInfo = (info) => {
     setExpenses(info.expenses);
     setStats(info.stats);
     setFailed(info.failed);
+    setSuggestions(info.suggestions);
   };
 
   const handleRecieptsSubmit = (value) => {
@@ -30,14 +32,14 @@ const App = () => {
 
   const handleExport = () => {
     const expenseWorker = new ExpenseWorker();
-    setStatus({ on: true, type: "LOADING", message: "Uploading Expenses" });
+    setStatus({ on: true, type: "LOADING", message: "Exporting Expenses" });
     expenseWorker
       .export(expenses)
       .then((res) => {
         setStatus({
           on: true,
           type: "SUCCESS",
-          message: "Expenses Uploaded",
+          message: "Expenses Exported",
           action: () => setStage(0),
         });
       })
@@ -45,7 +47,7 @@ const App = () => {
         setStatus({
           on: true,
           type: "ERROR",
-          message: `Error Uploading Expenses: ${err.message}`,
+          message: `Error Exporting Expenses: ${err.message}`,
           action: () => setStage(0),
         });
       });
@@ -59,6 +61,8 @@ const App = () => {
         failed,
         expenses,
         setExpenses,
+        suggestions,
+        setSuggestions,
         handleExport,
         setStage,
       }}

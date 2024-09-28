@@ -2,9 +2,11 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
 import ExpenseWorker from "../utils/expenseWorker";
 import samples from "../lib/samples";
+import { useSelector } from "react-redux";
 
 const Reciepts = ({ onSubmit }) => {
   const [receipts, setReceipts] = useState("");
+  const dictionary = useSelector((state) => state.dictionary);
 
   const handleChange = ({ target }) => {
     setReceipts(target.value);
@@ -13,7 +15,7 @@ const Reciepts = ({ onSubmit }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const expenseWorker = new ExpenseWorker();
-    onSubmit(expenseWorker.fetchExpenses(receipts));
+    onSubmit(expenseWorker.fetchExpenses(receipts, dictionary));
   };
 
   return (

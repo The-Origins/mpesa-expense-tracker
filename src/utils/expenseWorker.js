@@ -80,10 +80,14 @@ class ExpenseWorker {
     };
   }
 
-  fetchExpenses(receipts) {
+  fetchExpenses(receipts, dictionary) {
     let expenses = {};
     let failed = [];
     let stats = { all: { total: 0, entries: 0 } };
+    let suggestions = {
+      expense: ["Unknown"],
+      receipient: [],
+    };
     // Ensure that newlines and special spaces are handled
     const recieptIdRegex =
       /\b(?=[A-Z]{2})(?=(?:[^0-9]*[0-9]){1})[A-Z0-9]{10}(?=\s|\.)/g;
@@ -125,7 +129,24 @@ class ExpenseWorker {
             continue;
           }
 
+          if (!suggestions.receipient.includes(info.receipient)) {
+            suggestions.receipient.push(info.receipient);
+          }
+
           info.expense = "Unknown";
+          Object.keys(dictionary).forEach((key) => {
+            if (key !== "_persist") {
+              if (!suggestions.expense.includes(key)) {
+                suggestions.expense.push(key);
+              }
+              if (
+                dictionary[key] &&
+                dictionary[key].includes(info.receipient)
+              ) {
+                info.expense = key;
+              }
+            }
+          });
 
           const expense = this.addExpense(stats, expenses, info);
           stats = expense.stats;
@@ -133,7 +154,7 @@ class ExpenseWorker {
         }
       }
     }
-    return { stats, expenses, failed };
+    return { stats, expenses, failed, suggestions };
   }
 
   addExpense(stats, expenses, expense) {

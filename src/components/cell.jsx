@@ -14,13 +14,12 @@ const Cell = ({
   value = "",
   handleChange,
   handleSave,
-  suggestions = [],
+  suggestions,
   format = (value) => value,
   isGrey = false,
   isBold = false,
   enableEdit = false,
 }) => {
-  const [initialValue] = useState(value);
   const theme = useTheme();
   const [isEdit, setIsEdit] = useState(false);
   const [open, setOpen] = useState(false);
@@ -31,12 +30,7 @@ const Cell = ({
   };
 
   const onSave = () => {
-    if (!value.length) {
-      handleChange({ target: { name, value: initialValue } });
-    }
-    if (value !== initialValue) {
-      handleSave();
-    }
+    handleSave(name);
     setIsEdit(false);
     setOpen(false);
   };
@@ -87,29 +81,40 @@ const Cell = ({
               alignItems: "center",
             }}
           >
-            <Autocomplete
-              fullWidth
-              freeSolo
-              disableClearable
-              getOptionLabel={(option) => String(option)}
-              options={suggestions}
-              open={open}
-              onOpen={() => setOpen(true)}
-              onClose={() => setOpen(false)}
-              value={value}
-              onChange={(_, value) => onChange({ target: { name, value } })}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  autoFocus
-                  sx={{ width: "100%", height: "100%" }}
-                  name={name}
-                  value={value}
-                  onChange={onChange}
-                  fullWidth
-                />
-              )}
-            />
+            {suggestions ? (
+              <Autocomplete
+                fullWidth
+                freeSolo
+                disableClearable
+                getOptionLabel={(option) => String(option)}
+                options={suggestions}
+                open={open}
+                onOpen={() => setOpen(true)}
+                onClose={() => setOpen(false)}
+                value={value}
+                onChange={(_, value) => onChange({ target: { name, value } })}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    autoFocus
+                    sx={{ width: "100%", height: "100%" }}
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    fullWidth
+                  />
+                )}
+              />
+            ) : (
+              <TextField
+                autoFocus
+                sx={{ width: "100%", height: "100%" }}
+                name={name}
+                value={value}
+                onChange={onChange}
+                fullWidth
+              />
+            )}
           </form>
         ) : (
           <Typography

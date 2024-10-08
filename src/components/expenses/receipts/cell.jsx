@@ -12,6 +12,7 @@ const Cell = ({
   onClick = () => {},
   name = "",
   value = "",
+  input,
   handleChange,
   handleSave,
   suggestions,
@@ -93,18 +94,24 @@ const Cell = ({
                 onClose={() => setOpen(false)}
                 value={value}
                 onChange={(_, value) => onChange({ target: { name, value } })}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    autoFocus
-                    sx={{ width: "100%", height: "100%" }}
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    fullWidth
-                  />
-                )}
+                renderInput={(params) =>
+                  input ? (
+                    input(params, true)
+                  ) : (
+                    <TextField
+                      {...params}
+                      autoFocus
+                      sx={{ width: "100%", height: "100%" }}
+                      name={name}
+                      value={value}
+                      onChange={onChange}
+                      fullWidth
+                    />
+                  )
+                }
               />
+            ) : input ? (
+              input()
             ) : (
               <TextField
                 autoFocus

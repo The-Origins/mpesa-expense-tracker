@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Cell from "./cell";
-import { Box } from "@mui/material";
+import { Box, } from "@mui/material";
 import dayjs from "dayjs";
 import { useDispatch } from "react-redux";
-import { addToDictionary, removeFromDictionary } from "../state/dictionary";
+import { addToDictionary } from "../../../state/dictionary";
 
 const ExpenseComponent = ({
   index,
@@ -13,42 +13,37 @@ const ExpenseComponent = ({
   setSuggestions,
 }) => {
   const dispatch = useDispatch();
-  const [previousExpense, setPreviousExpense] = useState(expense.expense);
-  const [currentExpense, setCurrentExpense] = useState(expense);
+  const [form, setForm] = useState(expense);
 
   const handleSave = (name) => {
-    if (!currentExpense[name].length) {
-      return setCurrentExpense((prev) => ({
+    if (!form[name].length) {
+      return setForm((prev) => ({
         ...prev,
         [name]: expense[name],
       }));
     }
-    if (currentExpense[name] !== expense[name]) {
+    if (form[name] !== expense[name]) {
       setExpenseUpdates((prev) => ({
         ...prev,
-        [index]: currentExpense,
+        [index]: form,
       }));
       if (name === "expense") {
         dispatch(
-          removeFromDictionary({
-            key: previousExpense,
-            value: currentExpense.receipient,
-          })
-        );
-        dispatch(
           addToDictionary({
-            key: currentExpense.expense,
-            value: currentExpense.receipient,
+            key: {
+              expense: form.expense,
+              variant: form.variant,
+            },
+            value: form.receipient,
           })
         );
-        setPreviousExpense(currentExpense.expense);
       }
 
       setSuggestions((prev) => {
         const newSuggestions = prev[name].filter(
-          (value) => value !== currentExpense[name]
+          (value) => value !== form[name]
         );
-        newSuggestions.unshift(currentExpense[name]);
+        newSuggestions.unshift(form[name]);
         return {
           ...prev,
           [name]: newSuggestions,
@@ -58,14 +53,14 @@ const ExpenseComponent = ({
   };
 
   const handleChange = ({ target }) => {
-    setCurrentExpense((prev) => ({
+    setForm((prev) => ({
       ...prev,
       [target.name]: target.value,
     }));
   };
 
   useEffect(() => {
-    setCurrentExpense(expense);
+    setForm(expense);
   }, [expense]);
   return (
     <Box display={"flex"}>
@@ -73,17 +68,18 @@ const ExpenseComponent = ({
         index={`${index}1`}
         enableEdit
         name={"expense"}
-        value={currentExpense.expense}
+        value={form.expense}
         handleChange={handleChange}
         handleSave={handleSave}
         suggestions={suggestions.expense}
+        
       />
       <Cell
         index={`${index}2`}
         isGrey
         enableEdit
         name={"receipient"}
-        value={currentExpense.receipient}
+        value={form.receipient}
         handleChange={handleChange}
         handleSave={handleSave}
         suggestions={suggestions.receipient}
@@ -92,7 +88,7 @@ const ExpenseComponent = ({
         index={`${index}3`}
         enableEdit
         name={"amount"}
-        value={currentExpense.amount}
+        value={form.amount}
         handleChange={handleChange}
         handleSave={handleSave}
         format={(value) => "Ksh " + Number(value).toLocaleString("US")}
@@ -102,7 +98,7 @@ const ExpenseComponent = ({
         enableEdit
         isGrey
         name={"date"}
-        value={currentExpense.date}
+        value={form.date}
         handleChange={handleChange}
         handleSave={handleSave}
         format={(value) => dayjs(value).format("ddd, D MMM YYYY, HH:mm")}
@@ -111,7 +107,7 @@ const ExpenseComponent = ({
         index={`${index}5`}
         enableEdit
         name={"ref"}
-        value={currentExpense.ref}
+        value={form.ref}
         handleChange={handleChange}
         handleSave={handleSave}
       />

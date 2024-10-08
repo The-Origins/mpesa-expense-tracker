@@ -1,11 +1,13 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import React, { useState } from "react";
-import ExpenseWorker from "../utils/expenseWorker";
-import samples from "../lib/samples";
+import ExpenseWorker from "../../../utils/expenseWorker";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-const Reciepts = ({ onSubmit }) => {
+const AddReciepts = ({ handleData }) => {
+  const navigate = useNavigate();
   const [receipts, setReceipts] = useState("");
+  const statistics = useSelector((state) => state.statistics);
   const dictionary = useSelector((state) => state.dictionary);
 
   const handleChange = ({ target }) => {
@@ -15,7 +17,15 @@ const Reciepts = ({ onSubmit }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const expenseWorker = new ExpenseWorker();
-    onSubmit(expenseWorker.fetchExpenses(receipts, dictionary));
+    const mutableStatistics = JSON.parse(JSON.stringify(statistics));
+
+    handleData(
+      expenseWorker.fetchExpenses(
+        receipts,
+        dictionary,
+        mutableStatistics,
+      )
+    );
   };
 
   return (
@@ -35,14 +45,9 @@ const Reciepts = ({ onSubmit }) => {
         justifyContent={"space-between"}
         alignItems={"center"}
       >
-        <Typography width={"100%"}>Enter Receipts</Typography>
-        <Button
-          variant="outlined"
-          onClick={() => setReceipts(samples)}
-          size="large"
-        >
-          Loadsamples
-        </Button>
+        <Typography fontWeight={"bold"} fontSize={"1.2rem"}>
+          Enter Receipts
+        </Typography>
       </Box>
       <TextField
         label="Receipts"
@@ -53,16 +58,21 @@ const Reciepts = ({ onSubmit }) => {
         multiline
         fullWidth
       />
-      <Button
-        type="submit"
-        variant="contained"
-        disableElevation
-        disabled={!receipts.length}
-      >
-        Fetch Expenses
-      </Button>
+      <Box display={"flex"} justifyContent={"space-between"}>
+        <Button variant="outlined" onClick={() => navigate("/dashboard")}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="contained"
+          disableElevation
+          disabled={!receipts.length}
+        >
+          Fetch Expenses
+        </Button>
+      </Box>
     </form>
   );
 };
 
-export default Reciepts;
+export default AddReciepts;

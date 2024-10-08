@@ -1,4 +1,4 @@
-const samples = `RLP87TIR0W Confirmed. Ksh133.00 paid to CARREFOUR 12. on 25/12/23 at 5:21 PM.New M-PESA balance is Ksh1,224.14. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,867.00. To move money from bank to M-PESA, dial *334#>Withdraw>From bank to MPESA
+const receipts = `RLP87TIR0W Confirmed. Ksh133.00 paid to CARREFOUR 12. on 25/12/23 at 5:21 PM.New M-PESA balance is Ksh1,224.14. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,867.00. To move money from bank to M-PESA, dial *334#>Withdraw>From bank to MPESA
  Tuesday, December 26, 2023 · 12:09 PM 
 RLQ09NXH7G Confirmed. Ksh80.00 sent to MARY  WAMBUI on 26/12/23 at 12:09 PM. New M-PESA balance is Ksh1,144.14. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,920.00. To receive Money on POCHI today dial *334# & opt in.
 RLQ49RH948 Confirmed.on 26/12/23 at 12:46 PMWithdraw Ksh700.00 from 2045832 - ALISA ENT LTD LUCKY INVESTMENT MARURUI MARURUI New M-PESA balance is Ksh415.14. Transaction cost, Ksh29.00. Amount you can transact within the day is 499,220.00. Withdraw your Fuliza limit at any M-Pesa agent Click https://bit.ly/3rhk97G or dial *334#
@@ -1759,5 +1759,88 @@ SIJ55T2RB1 Confirmed. Ksh340.00 paid to QUICKMART NGONG-MILELE MALL. on 19/9/24 
 SIL3DA8GP1 Confirmed. Ksh500.00 paid to RUBIS KIBIKO 1. on 21/9/24 at 2:39 PM.New M-PESA balance is Ksh4,620.91. Transaction cost, Ksh2.75. Amount you can transact within the day is 499,500.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
  Saturday · 4:14 PM 
 SIL8DNME10 Confirmed. Ksh500.00 sent to STEPHEN  GOR 0716141397 on 21/9/24 at 4:13 PM. New M-PESA balance is Ksh4,113.91. Transaction cost, Ksh7.00. Amount you can transact within the day is 499,000.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SIN3L03J69 Confirmed. Ksh500.00 sent to STEPHEN  GOR 0716141397 on 23/9/24 at 2:44 PM. New M-PESA balance is Ksh3,606.91. Transaction cost, Ksh7.00. Amount you can transact within the day is 499,500.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SIN7L2Q2BZ Confirmed. Ksh522.00 paid to CARREFOUR 10. on 23/9/24 at 3:05 PM.New M-PESA balance is Ksh3,084.91. Transaction cost, Ksh0.00. Amount you can transact within the day is 498,978.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Tuesday, Sep 24 · 11:43 AM 
+SIO1OC3ZIJ Confirmed. Ksh500.00 paid to RUBIS KIBIKO 1. on 24/9/24 at 11:43 AM.New M-PESA balance is Ksh2,582.16. Transaction cost, Ksh2.75. Amount you can transact within the day is 499,500.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Tuesday, Sep 24 · 1:05 PM 
+SIO2OMEDRW Confirmed. Ksh85.00 paid to QUICKMART NGONG-MILELE MALL. on 24/9/24 at 1:04 PM.New M-PESA balance is Ksh2,497.16. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,415.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Wednesday, Sep 25 · 1:16 PM 
+SIP5SK8PLD Confirmed. Ksh1,000.00 paid to RUBIS KIBIKO 4. on 25/9/24 at 1:15 PM.New M-PESA balance is Ksh1,491.66. Transaction cost, Ksh5.50. Amount you can transact within the day is 499,000.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SIP4SLM4EA Confirmed. Ksh80.00 paid to QUICKMART NGONG-MILELE MALL. on 25/9/24 at 1:25 PM.New M-PESA balance is Ksh1,411.66. Transaction cost, Ksh0.00. Amount you can transact within the day is 498,920.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SIP6SLYJIQ Confirmed. Ksh238.00 paid to QUICKMART NGONG-MILELE MALL. on 25/9/24 at 1:28 PM.New M-PESA balance is Ksh1,173.66. Transaction cost, Ksh0.00. Amount you can transact within the day is 498,682.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Wednesday, Sep 25 · 3:04 PM 
+SIP1SYNDJ9 Confirmed. Ksh1,000.00 paid to MOSAH KOBIL. on 25/9/24 at 3:04 PM.New M-PESA balance is Ksh168.16. Transaction cost, Ksh5.50. Amount you can transact within the day is 497,682.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Thursday, Sep 26 · 6:01 AM 
+Failed. You do not have enough money in your M-PESA account to pay Ksh500.00 to TOTALENERGIES NANYUKI. Your M-PESA balance is Ksh168.16.  Dial *334# to register for the M-PESA overdraw Services Fuliza.
+SIQ4V929B2 Confirmed.You have received Ksh10,000.00 from KCB 1 501901 on 26/9/24 at 6:01 AM New M-PESA balance is Ksh10,168.16.  Separate personal and business funds through Pochi la Biashara on *334#.
+SIQ6V9309E Confirmed. Ksh500.00 paid to TOTALENERGIES NANYUKI. on 26/9/24 at 6:02 AM.New M-PESA balance is Ksh9,665.41. Transaction cost, Ksh2.75. Amount you can transact within the day is 499,500.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Thursday, Sep 26 · 2:49 PM 
+SIQ2WXE54E Confirmed. Ksh510.00 sent to Jerusha  Kaimuri 0794879780 on 26/9/24 at 2:49 PM. New M-PESA balance is Ksh9,142.41. Transaction cost, Ksh13.00. Amount you can transact within the day is 498,990.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SIQ3WXVBIN Confirmed. Ksh1,000.00 paid to LALJI RAMJI FILLING. on 26/9/24 at 2:52 PM.New M-PESA balance is Ksh8,136.91. Transaction cost, Ksh5.50. Amount you can transact within the day is 497,990.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SIQ7X27VJ5 Confirmed. Ksh602.00 paid to QUICK MART  NANYUKI. on 26/9/24 at 3:26 PM.New M-PESA balance is Ksh7,534.91. Transaction cost, Ksh0.00. Amount you can transact within the day is 497,388.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SIQ2X8N0GM Confirmed. Ksh1,000.00 paid to RUBIS KIGANJO. on 26/9/24 at 4:13 PM.New M-PESA balance is Ksh6,529.41. Transaction cost, Ksh5.50. Amount you can transact within the day is 496,388.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Thursday, Sep 26 · 6:16 PM 
+SIQ9XT8045 Confirmed. Ksh500.00 paid to EXELUS INVESTMENTS LIMITED. on 26/9/24 at 6:16 PM.New M-PESA balance is Ksh6,026.66. Transaction cost, Ksh2.75. Amount you can transact within the day is 495,888.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SIQ4Y3CXMA Confirmed. Ksh285.00 paid to QUICKMART NGONG-MILELE MALL. on 26/9/24 at 7:01 PM.New M-PESA balance is Ksh5,741.66. Transaction cost, Ksh0.00. Amount you can transact within the day is 495,603.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Friday, Sep 27 · 8:55 AM 
+SIR5ZSMLLD Confirmed. Ksh621.92 sent to M-PESA CARD for account Alibaba.com              Luxembourg   LU on 27/9/24 at 8:55 AM New M-PESA balance is Ksh5,119.74. Transaction cost, Ksh0.00.Amount you can transact within the day is 499,378.08. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Friday, Sep 27 · 2:01 PM 
+SIR61X45YY Confirmed. Ksh2,780.00 paid to DAD MILELE. on 27/9/24 at 2:01 PM.New M-PESA balance is Ksh2,339.74. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,598.08. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SIR31XOFE1 Confirmed.You have received Ksh1,390.00 from SHAMMAH  KANYORI 0708982127 on 27/9/24 at 2:05 PM  New M-PESA balance is Ksh3,729.74. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke
+SIR425OR2Y Confirmed. Ksh70.00 paid to QUICKMART NGONG-MILELE MALL. on 27/9/24 at 3:02 PM.New M-PESA balance is Ksh3,659.74. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,528.08. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Saturday, Sep 28 · 5:33 PM 
+SIS2745YCU Confirmed. Ksh466.00 paid to CARREFOUR 05. on 28/9/24 at 5:33 PM.New M-PESA balance is Ksh3,193.74. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,534.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Monday · 9:47 AM 
+SIU7D80OBV Confirmed. Ksh500.00 paid to RUBIS KIBIKO 1. on 30/9/24 at 9:47 AM.New M-PESA balance is Ksh2,690.99. Transaction cost, Ksh2.75. Amount you can transact within the day is 499,500.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Monday · 11:16 AM 
+SIU2DJCRZQ Confirmed. Ksh500.00 sent to STEPHEN  GOR 0716141397 on 30/9/24 at 11:16 AM. New M-PESA balance is Ksh2,183.99. Transaction cost, Ksh7.00. Amount you can transact within the day is 499,000.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+ Monday · 12:35 PM 
+SIU7DTJK97 Confirmed. Ksh300.00 sent to Equity Paybill Account for account 0711766202 on 30/9/24 at 12:35 PM New M-PESA balance is Ksh1,878.99. Transaction cost, Ksh5.00.Amount you can transact within the day is 498,700.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SIU9DUKPHJ Confirmed. Ksh300.00 sent to DUNCAN  MUASA 0725347606 on 30/9/24 at 12:42 PM. New M-PESA balance is Ksh1,571.99. Transaction cost, Ksh7.00. Amount you can transact within the day is 498,400.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SIU7DXBURN Confirmed.You have received Ksh10,000.00 from KCB 1 501901 on 30/9/24 at 1:02 PM New M-PESA balance is Ksh11,571.99.  Separate personal and business funds through Pochi la Biashara on *334#.
+SIU9DXFT1D Confirmed. Ksh2,000.00 sent to MARY  WARINGA on 30/9/24 at 1:03 PM. New M-PESA balance is Ksh9,538.99. Transaction cost, Ksh33.00. Amount you can transact within the day is 496,400.00. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke
+SIU9E03GV5 Confirmed. Ksh80.00 sent to MARY  WARINGA on 30/9/24 at 1:22 PM. New M-PESA balance is Ksh9,458.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,320.00. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke
+ Monday · 2:51 PM 
+SIU9ECN4SD Confirmed. Ksh230.00 sent to MARY  WARINGA on 30/9/24 at 2:50 PM. New M-PESA balance is Ksh9,221.99. Transaction cost, Ksh7.00. Amount you can transact within the day is 496,090.00. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke
+SIU7EFXC8Z Confirmed. Ksh70.00 sent to MARY  WARINGA on 30/9/24 at 3:14 PM. New M-PESA balance is Ksh9,151.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,020.00. Sign up for Lipa Na M-PESA Till online https://m-pesaforbusiness.co.ke
+SIU6EHJX3K Confirmed. Ksh3,000.00 sent to KEVIN  NJUGUNA 0723041663 on 30/9/24 at 3:26 PM. New M-PESA balance is Ksh6,098.99. Transaction cost, Ksh53.00. Amount you can transact within the day is 493,020.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+ Tuesday · 10:45 AM 
+SJ19HL2KO5 Confirmed. Ksh2,000.00 sent to KEVIN  NJUGUNA 0723041663 on 1/10/24 at 10:45 AM. New M-PESA balance is Ksh4,065.99. Transaction cost, Ksh33.00. Amount you can transact within the day is 498,000.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+ Tuesday · 12:11 PM 
+SJ15HWAORF Confirmed. Ksh500.00 sent to STEPHEN  GOR 0716141397 on 1/10/24 at 12:11 PM. New M-PESA balance is Ksh3,558.99. Transaction cost, Ksh7.00. Amount you can transact within the day is 497,500.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SJ19HYGM9V confirmed.You bought Ksh200.00 of airtime on 1/10/24 at 12:27 PM.New M-PESA balance is Ksh3,358.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 497,300.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SJ12I4VOX2 Confirmed. Ksh773.00 paid to Naivas waterfront Karen. on 1/10/24 at 1:13 PM.New M-PESA balance is Ksh2,585.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,527.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SJ10I8MVBA Confirmed.You have received Ksh10,000.00 from KCB 1 501901 on 1/10/24 at 1:38 PM New M-PESA balance is Ksh12,585.99.  Separate personal and business funds through Pochi la Biashara on *334#.
+SJ13I9T57P Confirmed. Ksh300.00 sent to KEVIN  NJUGUNA 0723041663 on 1/10/24 at 1:46 PM. New M-PESA balance is Ksh12,278.99. Transaction cost, Ksh7.00. Amount you can transact within the day is 496,227.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+ Tuesday · 2:58 PM 
+SJ14IJU0DO Confirmed. Ksh4,000.00 sent to STEPHEN  GOR 0716141397 on 1/10/24 at 2:58 PM. New M-PESA balance is Ksh8,221.99. Transaction cost, Ksh57.00. Amount you can transact within the day is 492,227.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+ Wednesday · 4:20 AM 
+SJ25KYWNLF Confirmed. Ksh724.50 sent to M-PESA CARD for account NETFLIX INTERNATIONAL BV Amsterdam    NL on 2/10/24 at 4:20 AM New M-PESA balance is Ksh7,497.49. Transaction cost, Ksh0.00.Amount you can transact within the day is 499,275.50. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Wednesday · 12:29 PM 
+SJ24M80YLY Confirmed. Ksh1,000.00 paid to RUBIS KIBIKO 4. on 2/10/24 at 12:29 PM.New M-PESA balance is Ksh6,491.99. Transaction cost, Ksh5.50. Amount you can transact within the day is 498,275.50. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SJ22M9UEFC Confirmed. Ksh308.00 paid to QUICKMART NGONG-MILELE MALL. on 2/10/24 at 12:42 PM.New M-PESA balance is Ksh6,183.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 497,967.50. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Wednesday · 2:28 PM 
+SJ21MP29A3 Confirmed. Ksh1,000.00 paid to MOSAH KOBIL. on 2/10/24 at 2:28 PM.New M-PESA balance is Ksh5,178.49. Transaction cost, Ksh5.50. Amount you can transact within the day is 496,967.50. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SJ28MR0U5Y Confirmed. Ksh60.00 paid to TABS INN HOTEL. on 2/10/24 at 2:42 PM.New M-PESA balance is Ksh5,118.49. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,907.50. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Wednesday · 6:14 PM 
+SJ21NOFFIV Confirmed. Ksh500.00 paid to TOTALENERGIES LAIKIPIA RD. on 2/10/24 at 6:14 PM.New M-PESA balance is Ksh4,615.74. Transaction cost, Ksh2.75. Amount you can transact within the day is 496,407.50. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Thursday · 1:51 PM 
+SJ39QTTNU7 Confirmed. Ksh1,000.00 paid to RUBIS TIMAU. on 3/10/24 at 1:51 PM.New M-PESA balance is Ksh3,610.24. Transaction cost, Ksh5.50. Amount you can transact within the day is 499,000.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SJ38QXAXXS Confirmed. Ksh673.00 paid to QUICK MART  NANYUKI. on 3/10/24 at 2:16 PM.New M-PESA balance is Ksh2,937.24. Transaction cost, Ksh0.00. Amount you can transact within the day is 498,327.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Thursday · 3:25 PM 
+SJ37R6Y78F Confirmed. Ksh1,000.00 paid to OLA ENERGY KENYA LIMITED. on 3/10/24 at 3:25 PM.New M-PESA balance is Ksh1,931.74. Transaction cost, Ksh5.50. Amount you can transact within the day is 497,327.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Thursday · 5:31 PM 
+SJ39RPCW71 Confirmed. Ksh500.00 paid to Shell Spanneright Service Station. on 3/10/24 at 5:30 PM.New M-PESA balance is Ksh1,428.99. Transaction cost, Ksh2.75. Amount you can transact within the day is 496,827.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+SJ38RUA4DO Confirmed. Ksh285.00 paid to QUICKMART NGONG-MILELE MALL. on 3/10/24 at 5:58 PM.New M-PESA balance is Ksh1,143.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,542.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Thursday · 8:53 PM 
+Dear customer, you do not have sufficient funds in your M-PESA account to pay Ksh1,340.33 to GITHUB, INC.             +18774484820 US.Your M-PESA balance is Ksh1,143.99.
+SJ35SX62RJ Confirmed.You have received Ksh10,000.00 from KCB 1 501901 on 3/10/24 at 8:56 PM New M-PESA balance is Ksh11,143.99.  Separate personal and business funds through Pochi la Biashara on *334#.
+ Saturday · 2:18 PM 
+SJ54ZK2IE0 Confirmed. Ksh529.00 paid to Naivas waterfront Karen. on 5/10/24 at 2:17 PM.New M-PESA balance is Ksh10,614.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 499,471.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
+ Saturday · 4:20 PM 
+SJ56138MFC Confirmed. Ksh2,000.00 sent to JOY  KANYORI 0796142450 on 5/10/24 at 4:20 PM. New M-PESA balance is Ksh8,581.99. Transaction cost, Ksh33.00. Amount you can transact within the day is 497,471.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SJ5513VQDV Confirmed. Ksh250.00 sent to JOY  KANYORI 0796142450 on 5/10/24 at 4:24 PM. New M-PESA balance is Ksh8,324.99. Transaction cost, Ksh7.00. Amount you can transact within the day is 497,221.00. Buy airtime from 1 bob via M-PESA today & keep that conversation going!
+SJ5816VC30 Confirmed. Ksh270.00 paid to Naivas waterfront Karen. on 5/10/24 at 4:42 PM.New M-PESA balance is Ksh8,054.99. Transaction cost, Ksh0.00. Amount you can transact within the day is 496,951.00. Download new M-PESA app on http://bit.ly/mpesappsm & get 500MB FREE data.
 `;
-export default samples;
+export default receipts;

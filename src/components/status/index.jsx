@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import React from "react";
 
-const StatusComponent = ({ status, setStatus, }) => {
+const StatusComponent = ({ status, setStatus, isAbsolute = false }) => {
   const { type, message, action, actionTitle } = status;
 
   const handleAction = () => {
@@ -18,6 +18,7 @@ const StatusComponent = ({ status, setStatus, }) => {
 
   return (
     <Box
+      position={isAbsolute ? "absolute" : "static"}
       bgcolor={"white"}
       color={"black"}
       width={"100%"}

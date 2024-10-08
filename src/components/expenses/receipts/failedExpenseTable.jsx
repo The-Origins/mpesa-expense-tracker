@@ -3,8 +3,23 @@ import { Box, Button, Typography, useTheme } from "@mui/material";
 import React from "react";
 import FailedExpense from "./failedExpense";
 
-const FailedExpenseTable = ({ expenses, failed, stats, setStage, onSave }) => {
+const FailedExpenseTable = ({
+  receiptFailed,
+  receiptStatistics,
+  receiptExpenses,
+  setReceiptExpenses,
+  setReceiptStatistics,
+  setReceiptFailed,
+  setStage,
+}) => {
   const theme = useTheme();
+
+  const handleData = (data) => {
+    setReceiptExpenses(data.expenses);
+    setReceiptStatistics(data.statistics);
+    setReceiptFailed(data.failed);
+  };
+
   return (
     <Box
       height={"100%"}
@@ -47,7 +62,7 @@ const FailedExpenseTable = ({ expenses, failed, stats, setStage, onSave }) => {
           variant="contained"
           onClick={() => setStage(1)}
           endIcon={<ChevronRight />}
-          disabled={!Object.keys(expenses || {}).length}
+          disabled={!Object.keys(receiptExpenses || {}).length}
         >
           Go to expenses
         </Button>
@@ -75,11 +90,17 @@ const FailedExpenseTable = ({ expenses, failed, stats, setStage, onSave }) => {
           padding={"20px"}
           gap={"20px"}
         >
-          {failed.length ? (
-            failed.map((expense, index) => (
+          {receiptFailed.length ? (
+            receiptFailed.map((expense, index) => (
               <FailedExpense
-                onSave={onSave}
-                {...{ expense, index, failed, stats, expenses }}
+                {...{
+                  expense,
+                  index,
+                  receiptFailed,
+                  receiptStatistics,
+                  receiptExpenses,
+                  handleData,
+                }}
               />
             ))
           ) : (

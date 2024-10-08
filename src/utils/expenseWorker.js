@@ -80,10 +80,13 @@ class ExpenseWorker {
     };
   }
 
-  fetchExpenses(receipts, dictionary) {
-    let expenses = {};
-    let failed = [];
-    let stats = { all: { total: 0, entries: 0 } };
+  fetchExpenses(
+    receipts,
+    dictionary,
+    statistics = { all: { total: 0, entries: 0 } },
+    expenses = [],
+    failed = []
+  ) {
     let suggestions = {
       expense: ["Unknown"],
       receipient: [],
@@ -134,58 +137,165 @@ class ExpenseWorker {
           }
 
           info.expense = "Unknown";
-          Object.keys(dictionary).forEach((key) => {
-            if (key !== "_persist") {
-              if (!suggestions.expense.includes(key)) {
-                suggestions.expense.push(key);
-              }
-              if (
-                dictionary[key] &&
-                dictionary[key].includes(info.receipient)
-              ) {
-                info.expense = key;
-              }
+          info.varaint = "";
+          if (dictionary) {
+            if (dictionary.expenses[info.receipient]) {
+              info.expense = dictionary.expenses[info.receipient].expense;
+              info.varaint = dictionary.expenses[info.receipient].varaint;
+              suggestions.expense.push(info.expense);
+            } else {
+              dictionary.keywords.forEach((keyword) => {
+                if (info.receipient.toLowerCase().includes(keyword)) {
+                  info.expense = dictionary.expenses[keyword].expense;
+                  info.varaint = dictionary.expenses[keyword].variant;
+                  suggestions.expense.push(info.expense);
+                }
+              });
             }
-          });
+          }
 
-          const expense = this.addExpense(stats, expenses, info);
-          stats = expense.stats;
+          const expense = this.addExpense(statistics, expenses, info);
+          statistics = expense.statistics;
           expenses = expense.expenses;
         }
       }
     }
-    return { stats, expenses, failed, suggestions };
+
+    return { statistics, expenses, failed, suggestions };
   }
 
-  addExpense(stats, expenses, expense) {
+  addExpense(statistics, expenses, expense) {
     const expenseDate = dayjs(expense.date);
-    const expenseMonth = expenseDate.format("MMMM");
-    const expenseYear = expenseDate.format("YYYY");
+    let weekDay = expenseDate.day();
+    let weekStart = dayjs(expense.date).set(
+      "date",
+      expenseDate.date() - weekDay
+    );
+    let weekEnd = dayjs(expense.date).set("date", weekStart.date() + 6);
+    const expenseWeek = `${weekStart.format("YYYY-MM-DD")}/${weekEnd.format(
+      "YYYY-MM-DD"
+    )}`;
+    const expenseMonth = expenseDate.month();
+    const expenseYear = expenseDate.year();
 
-    stats.all.total += Number(expense.amount);
-    stats.all.entries += 1;
-    stats[expenseYear] = stats[expenseYear] || { total: 0, entries: 0 };
-    stats[expenseYear].total += Number(expense.amount);
-    stats[expenseYear].entries += 1;
-    stats[expenseYear][expenseMonth] = stats[expenseYear][expenseMonth] || {
+    statistics.all.total += Number(expense.amount);
+    statistics.all.entries += 1;
+    statistics.all.expenses = statistics.all.expenses || {};
+    statistics.all.expenses[expense.expense] = statistics.all.expenses[
+      expense.expense
+    ] || {
       total: 0,
       entries: 0,
+      variants: {},
     };
-    stats[expenseYear][expenseMonth].total += Number(expense.amount);
-    stats[expenseYear][expenseMonth].entries += 1;
 
-    expenses[expenseYear] = expenses[expenseYear] || {};
+    statistics.all.expenses[expense.expense].total += Number(expense.amount);
+    statistics.all.expenses[expense.expense].entries += 1;
 
-    expenses[expenseYear][expenseMonth] =
-      expenses[expenseYear][expenseMonth] || [];
+    statistics[expenseYear] = statistics[expenseYear] || {
+      total: 0,
+      entries: 0,
+      expenses: {},
+    };
+    statistics[expenseYear].total += Number(expense.amount);
+    statistics[expenseYear].entries += 1;
 
-    expenses[expenseYear][expenseMonth] = [
-      ...expenses[expenseYear][expenseMonth],
-      expense,
-    ];
+    statistics[expenseYear].expenses[expense.expense] = statistics[expenseYear]
+      .expenses[expense.expense] || {
+      total: 0,
+      entries: 0,
+      variants: {},
+    };
+    statistics[expenseYear].expenses[expense.expense].total += Number(
+      expense.amount
+    );
+    statistics[expenseYear].expenses[expense.expense].entries += 1;
+
+    statistics[expenseYear][expenseMonth] = statistics[expenseYear][
+      expenseMonth
+    ] || {
+      total: 0,
+      entries: 0,
+      expenses: {},
+    };
+    statistics[expenseYear][expenseMonth].total += Number(expense.amount);
+    statistics[expenseYear][expenseMonth].entries += 1;
+
+    statistics[expenseYear][expenseMonth].expenses[expense.expense] =
+      statistics[expenseYear][expenseMonth].expenses[expense.expense] || {
+        total: 0,
+        entries: 0,
+        variants: {},
+      };
+    statistics[expenseYear][expenseMonth].expenses[expense.expense].total +=
+      Number(expense.amount);
+    statistics[expenseYear][expenseMonth].expenses[
+      expense.expense
+    ].entries += 1;
+
+    statistics[expenseYear][expenseMonth][expenseWeek] = statistics[
+      expenseYear
+    ][expenseMonth][expenseWeek] || { total: 0, entries: 0, expenses: {} };
+    statistics[expenseYear][expenseMonth][expenseWeek].total += Number(
+      expense.amount
+    );
+    statistics[expenseYear][expenseMonth][expenseWeek].entries += 1;
+
+    statistics[expenseYear][expenseMonth][expenseWeek].expenses[
+      expense.expense
+    ] = statistics[expenseYear][expenseMonth][expenseWeek].expenses[
+      expense.expense
+    ] || {
+      total: 0,
+      entries: 0,
+      variants: {},
+    };
+    statistics[expenseYear][expenseMonth][expenseWeek].expenses[
+      expense.expense
+    ].total += Number(expense.amount);
+    statistics[expenseYear][expenseMonth][expenseWeek].expenses[
+      expense.expense
+    ].entries += 1;
+
+    statistics[expenseYear][expenseMonth][expenseWeek][
+      expenseDate.format("YYYY-MM-DD")
+    ] = statistics[expenseYear][expenseMonth][expenseWeek][
+      expenseDate.format("YYYY-MM-DD")
+    ] || {
+      total: 0,
+      entries: 0,
+      expenses: {},
+    };
+    statistics[expenseYear][expenseMonth][expenseWeek][
+      expenseDate.format("YYYY-MM-DD")
+    ].total += Number(expense.amount);
+    statistics[expenseYear][expenseMonth][expenseWeek][
+      expenseDate.format("YYYY-MM-DD")
+    ].entries += 1;
+
+    statistics[expenseYear][expenseMonth][expenseWeek][
+      expenseDate.format("YYYY-MM-DD")
+    ].expenses[expense.expense] = statistics[expenseYear][expenseMonth][
+      expenseWeek
+    ][expenseDate.format("YYYY-MM-DD")].expenses[expense.expense] || {
+      total: 0,
+      entries: 0,
+      variants: {},
+    };
+    statistics[expenseYear][expenseMonth][expenseWeek][
+      expenseDate.format("YYYY-MM-DD")
+    ].expenses[expense.expense].total += Number(expense.amount);
+    statistics[expenseYear][expenseMonth][expenseWeek][
+      expenseDate.format("YYYY-MM-DD")
+    ].expenses[expense.expense].entries += 1;
+
+    expenses.push(expense);
+
+    //sort expenses by date
+    expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     return {
-      stats,
+      statistics,
       expenses,
     };
   }
@@ -194,18 +304,8 @@ class ExpenseWorker {
     return new Promise((resolve, reject) => {
       try {
         const workbook = XLSX.utils.book_new();
-        Object.keys(expenses).forEach((year) => {
-          Object.keys(expenses[year]).forEach((month) => {
-            const worksheet = XLSX.utils.json_to_sheet(expenses[year][month]);
-
-            XLSX.utils.book_append_sheet(
-              workbook,
-              worksheet,
-              `${year}-${month}`
-            );
-          });
-        });
-
+        const worksheet = XLSX.utils.json_to_sheet(expenses);
+        XLSX.utils.book_append_sheet(workbook, worksheet, `expenses`);
         resolve(
           XLSX.writeFile(workbook, "expenses.xlsx", { bookType: "xlsx" })
         );

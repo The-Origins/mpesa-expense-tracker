@@ -20,11 +20,7 @@ const AddReciepts = ({ handleData }) => {
     const mutableStatistics = JSON.parse(JSON.stringify(statistics));
 
     handleData(
-      expenseWorker.fetchExpenses(
-        receipts,
-        dictionary,
-        mutableStatistics,
-      )
+      expenseWorker.fetchExpenses(receipts, dictionary, mutableStatistics)
     );
   };
 
@@ -58,7 +54,7 @@ const AddReciepts = ({ handleData }) => {
         multiline
         fullWidth
       />
-      <Box display={"flex"} justifyContent={"space-between"}>
+      <Box display={"flex"} justifyContent={"space-between"} width={"100%"}>
         <Button variant="outlined" onClick={() => navigate("/dashboard")}>
           Cancel
         </Button>

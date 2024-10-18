@@ -2,8 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 const dictionarySlice = createSlice({
   name: "dictionary",
   initialState: {
-    expenses: { shell: {expense:"fuel", variant:""}, total: {expense:"fuel", variant:""} },
-    keywords: ["shell", "total"],
+    expenses: {
+      shell: ["fuel"],
+      total: ["fuel"],
+      mart: ["groceries"],
+    },
+    keywords: ["shell", "total", "mart"],
   },
   reducers: {
     addToDictionary: (state, action) => {
@@ -13,7 +17,14 @@ const dictionarySlice = createSlice({
       delete state.expenses[action.payload.key];
     },
     resetDictionary: (state) => {
-      return { expenses: {}, keywords: [] };
+      return {
+        expenses: {
+          shell: ["fuel"],
+          total: ["fuel"],
+          mart: ["groceries"],
+        },
+        keywords: ["shell", "total", "mart"],
+      };
     },
     setDictionary: (state, action) => {
       return action.payload;

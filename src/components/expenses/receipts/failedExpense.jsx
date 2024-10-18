@@ -107,6 +107,7 @@ const FailedExpense = ({
             onBlur={handleBlur}
             error={errors.receipient && touched.receipient}
             helperText={errors.receipient && touched.receipient}
+            sx={{ flexGrow: 1 }}
           />
           <TextField
             fullWidth
@@ -117,6 +118,18 @@ const FailedExpense = ({
             onBlur={handleBlur}
             error={errors.receipient && touched.receipient}
             helperText={errors.receipient && touched.receipient}
+            sx={{ flexGrow: 1 }}
+          />
+          <TextField
+            fullWidth
+            label="ref"
+            name="ref"
+            value={form.ref}
+            onBlur={handleBlur}
+            onChange={handleChange}
+            error={errors.receipient && touched.receipient}
+            helperText={errors.receipient && touched.receipient}
+            sx={{ flexGrow: 1 }}
           />
           <DatePicker
             label="Select Date"
@@ -137,16 +150,6 @@ const FailedExpense = ({
             }}
             ampm={false}
             sx={{ flexGrow: 1 }}
-          />
-          <TextField
-            fullWidth
-            label="ref"
-            name="ref"
-            value={form.ref}
-            onBlur={handleBlur}
-            onChange={handleChange}
-            error={errors.receipient && touched.receipient}
-            helperText={errors.receipient && touched.receipient}
           />
         </Box>
         <TextField

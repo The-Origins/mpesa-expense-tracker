@@ -1,20 +1,30 @@
 class FormWorker {
+  formatString(value, lowerCase = false) {
+    if (typeof value === "string") {
+      value = value.trim().replace(/\s+/g, " ");
+      return lowerCase ? value.toLowerCase() : value;
+    }
+    if (Array.isArray(value)) {
+      return value.map((item) => {
+        item = item.trim().replace(/\s+/g, " ");
+        return lowerCase ? item.toLowerCase() : item;
+      });
+    }
+    if (typeof value === "object") {
+      return Object.keys(value).reduce((acc, key) => {
+        acc[key] = value[key].trim().replace(/\s+/g, " ");
+        acc[key] = lowerCase ? acc[key].toLowerCase() : acc[key];
+        return acc;
+      }, {});
+    }
+  }
   getErrors(errors, target, form) {
     const validator = {
-      ref: (value, form) => {
+      ref: (value) => {
         if (/^[A-Z0-9]+/.test(value)) {
           return null;
         } else {
           return "invalid ref";
-        }
-      },
-      expense: (value) => {
-        if (value.includes(",")) {
-          if (value.trim().length > 1 && !value.startsWith(",")) {
-            return null;
-          } else {
-            return "Expense must be before comma";
-          }
         }
       },
     };

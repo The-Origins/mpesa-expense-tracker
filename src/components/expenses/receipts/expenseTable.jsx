@@ -9,7 +9,7 @@ import {
 import React, { useState } from "react";
 import Cell from "./cell.jsx";
 import ExpenseComponent from "./expenseComponent.jsx";
-import { Add } from "@mui/icons-material";
+import { Add, MoneyOff } from "@mui/icons-material";
 import ExpenseAddModal from "../../modals/addExpense.jsx";
 import ExpenseWorker from "../../../utils/expenseWorker.js";
 import { useDispatch } from "react-redux";
@@ -121,7 +121,12 @@ const ExpensesTable = ({
           >
             Add expense
           </Button>
-          <Button variant="contained" disableElevation onClick={onSubmit}>
+          <Button
+            variant="contained"
+            disableElevation
+            onClick={onSubmit}
+            disabled={!receiptExpenses.length}
+          >
             Submit
           </Button>
         </Box>
@@ -153,17 +158,38 @@ const ExpensesTable = ({
           },
         }}
       >
-        {receiptExpenses.map((expense, index) => (
-          <ExpenseComponent
-            {...{
-              index,
-              expense,
-              setExpenseUpdates,
-              suggestions,
-              setSuggestions,
-            }}
-          />
-        ))}
+        {receiptExpenses.length ? (
+          receiptExpenses.map((expense, index) => (
+            <ExpenseComponent
+              {...{
+                index,
+                expense,
+                setExpenseUpdates,
+                suggestions,
+                setSuggestions,
+              }}
+            />
+          ))
+        ) : (
+          <Box
+            display={"flex"}
+            width={"100%"}
+            height={"100%"}
+            justifyContent={"center"}
+            alignItems={"center"}
+            flexDirection={"column"}
+          >
+            <MoneyOff />
+            <Typography>No expenses found</Typography>
+            <Button
+              disableElevation
+              variant="contained"
+              onClick={() => setStage(0)}
+            >
+              retry
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   );

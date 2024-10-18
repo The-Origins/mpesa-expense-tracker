@@ -28,6 +28,7 @@ import { setStatistics } from "./state/statistics";
 import { setFailed } from "./state/failed";
 import Expenses from "./components/expenses";
 import ParseReceipts from "./components/expenses/receipts";
+import { resetDictionary } from "./state/dictionary";
 
 const App = () => {
   const dispatch = useDispatch();

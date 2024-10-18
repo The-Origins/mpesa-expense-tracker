@@ -83,14 +83,10 @@ class ExpenseWorker {
   fetchExpenses(
     receipts,
     dictionary,
-    statistics = { all: { total: 0, entries: 0 } },
+    statistics = { all: { total: 0, entries: 0, expenses: {} } },
     expenses = [],
     failed = []
   ) {
-    let suggestions = {
-      expense: ["Unknown"],
-      receipient: [],
-    };
     // Ensure that newlines and special spaces are handled
     const recieptIdRegex =
       /\b(?=[A-Z]{2})(?=(?:[^0-9]*[0-9]){1})[A-Z0-9]{10}(?=\s|\.)/g;
@@ -118,12 +114,13 @@ class ExpenseWorker {
         !receipt.includes("Your account balance was")
       ) {
         let info = this.retriveInfo(receipt);
+
         if (info) {
           if (info.amount === null || isNaN(info.amount)) {
             failed.push({ receipt, info });
             continue;
           }
-          if (info.date === "Invalid Date") {
+          if (info.date === "Invalid Date" || info.date === null) {
             failed.push({ receipt, info });
             continue;
           }
@@ -132,23 +129,14 @@ class ExpenseWorker {
             continue;
           }
 
-          if (!suggestions.receipient.includes(info.receipient)) {
-            suggestions.receipient.push(info.receipient);
-          }
-
-          info.expense = "Unknown";
-          info.varaint = "";
+          info.expense = ["Unknown"];
           if (dictionary) {
             if (dictionary.expenses[info.receipient]) {
-              info.expense = dictionary.expenses[info.receipient].expense;
-              info.varaint = dictionary.expenses[info.receipient].varaint;
-              suggestions.expense.push(info.expense);
+              info.expense = dictionary.expenses[info.receipient];
             } else {
               dictionary.keywords.forEach((keyword) => {
                 if (info.receipient.toLowerCase().includes(keyword)) {
-                  info.expense = dictionary.expenses[keyword].expense;
-                  info.varaint = dictionary.expenses[keyword].variant;
-                  suggestions.expense.push(info.expense);
+                  info.expense = dictionary.expenses[keyword];
                 }
               });
             }
@@ -161,36 +149,27 @@ class ExpenseWorker {
       }
     }
 
-    return { statistics, expenses, failed, suggestions };
+    return { statistics, expenses, failed };
   }
 
   addExpense(statistics, expenses, expense) {
     const expenseDate = dayjs(expense.date);
-    let weekDay = expenseDate.day();
     let weekStart = dayjs(expense.date).set(
       "date",
-      expenseDate.date() - weekDay
+      expenseDate.date() - expenseDate.day()
     );
     let weekEnd = dayjs(expense.date).set("date", weekStart.date() + 6);
     const expenseWeek = `${weekStart.format("YYYY-MM-DD")}/${weekEnd.format(
       "YYYY-MM-DD"
     )}`;
+    const expenseDay = expenseDate.format("YYYY-MM-DD");
     const expenseMonth = expenseDate.month();
     const expenseYear = expenseDate.year();
 
     statistics.all.total += Number(expense.amount);
     statistics.all.entries += 1;
     statistics.all.expenses = statistics.all.expenses || {};
-    statistics.all.expenses[expense.expense] = statistics.all.expenses[
-      expense.expense
-    ] || {
-      total: 0,
-      entries: 0,
-      variants: {},
-    };
-
-    statistics.all.expenses[expense.expense].total += Number(expense.amount);
-    statistics.all.expenses[expense.expense].entries += 1;
+    this.addExpenseToStatistics(statistics.all, expense);
 
     statistics[expenseYear] = statistics[expenseYear] || {
       total: 0,
@@ -200,16 +179,7 @@ class ExpenseWorker {
     statistics[expenseYear].total += Number(expense.amount);
     statistics[expenseYear].entries += 1;
 
-    statistics[expenseYear].expenses[expense.expense] = statistics[expenseYear]
-      .expenses[expense.expense] || {
-      total: 0,
-      entries: 0,
-      variants: {},
-    };
-    statistics[expenseYear].expenses[expense.expense].total += Number(
-      expense.amount
-    );
-    statistics[expenseYear].expenses[expense.expense].entries += 1;
+    this.addExpenseToStatistics(statistics[expenseYear], expense);
 
     statistics[expenseYear][expenseMonth] = statistics[expenseYear][
       expenseMonth
@@ -221,17 +191,7 @@ class ExpenseWorker {
     statistics[expenseYear][expenseMonth].total += Number(expense.amount);
     statistics[expenseYear][expenseMonth].entries += 1;
 
-    statistics[expenseYear][expenseMonth].expenses[expense.expense] =
-      statistics[expenseYear][expenseMonth].expenses[expense.expense] || {
-        total: 0,
-        entries: 0,
-        variants: {},
-      };
-    statistics[expenseYear][expenseMonth].expenses[expense.expense].total +=
-      Number(expense.amount);
-    statistics[expenseYear][expenseMonth].expenses[
-      expense.expense
-    ].entries += 1;
+    this.addExpenseToStatistics(statistics[expenseYear][expenseMonth], expense);
 
     statistics[expenseYear][expenseMonth][expenseWeek] = statistics[
       expenseYear
@@ -241,63 +201,63 @@ class ExpenseWorker {
     );
     statistics[expenseYear][expenseMonth][expenseWeek].entries += 1;
 
-    statistics[expenseYear][expenseMonth][expenseWeek].expenses[
-      expense.expense
-    ] = statistics[expenseYear][expenseMonth][expenseWeek].expenses[
-      expense.expense
-    ] || {
-      total: 0,
-      entries: 0,
-      variants: {},
-    };
-    statistics[expenseYear][expenseMonth][expenseWeek].expenses[
-      expense.expense
-    ].total += Number(expense.amount);
-    statistics[expenseYear][expenseMonth][expenseWeek].expenses[
-      expense.expense
-    ].entries += 1;
+    this.addExpenseToStatistics(
+      statistics[expenseYear][expenseMonth][expenseWeek],
+      expense
+    );
 
-    statistics[expenseYear][expenseMonth][expenseWeek][
-      expenseDate.format("YYYY-MM-DD")
-    ] = statistics[expenseYear][expenseMonth][expenseWeek][
-      expenseDate.format("YYYY-MM-DD")
-    ] || {
+    statistics[expenseYear][expenseMonth][expenseWeek][expenseDay] = statistics[
+      expenseYear
+    ][expenseMonth][expenseWeek][expenseDay] || {
       total: 0,
       entries: 0,
       expenses: {},
     };
-    statistics[expenseYear][expenseMonth][expenseWeek][
-      expenseDate.format("YYYY-MM-DD")
-    ].total += Number(expense.amount);
-    statistics[expenseYear][expenseMonth][expenseWeek][
-      expenseDate.format("YYYY-MM-DD")
-    ].entries += 1;
+    statistics[expenseYear][expenseMonth][expenseWeek][expenseDay].total +=
+      Number(expense.amount);
+    statistics[expenseYear][expenseMonth][expenseWeek][expenseDay].entries += 1;
 
-    statistics[expenseYear][expenseMonth][expenseWeek][
-      expenseDate.format("YYYY-MM-DD")
-    ].expenses[expense.expense] = statistics[expenseYear][expenseMonth][
-      expenseWeek
-    ][expenseDate.format("YYYY-MM-DD")].expenses[expense.expense] || {
-      total: 0,
-      entries: 0,
-      variants: {},
-    };
-    statistics[expenseYear][expenseMonth][expenseWeek][
-      expenseDate.format("YYYY-MM-DD")
-    ].expenses[expense.expense].total += Number(expense.amount);
-    statistics[expenseYear][expenseMonth][expenseWeek][
-      expenseDate.format("YYYY-MM-DD")
-    ].expenses[expense.expense].entries += 1;
+    this.addExpenseToStatistics(
+      statistics[expenseYear][expenseMonth][expenseWeek][expenseDay],
+      expense
+    );
 
     expenses.push(expense);
 
     //sort expenses by date
     expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+    console.log({
+      statistics,
+      expenses,
+    });
+
     return {
       statistics,
       expenses,
     };
+  }
+
+  addExpenseToStatistics(statistics, info) {
+    let current = statistics.expenses || {};
+
+    // Loop through the expense array to nest each item
+    for (let i = 0; i < info.expense.length; i++) {
+      const expense = info.expense[i];
+      // Initialize the current level if it doesn't exist
+      current[expense] = current[expense] || {
+        total: 0,
+        entries: 0,
+        expenses: {},
+      };
+
+      // Update the total and entries for the current expense level
+      current[expense].total += Number(info.amount);
+      current[expense].entries += 1;
+
+      // Move to the next nested level (expenses)
+      current = current[expense].expenses;
+    }
   }
 
   async export(expenses) {

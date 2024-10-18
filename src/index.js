@@ -8,7 +8,7 @@ import theme from "./theme";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "./state/store";
-import { BrowserRouter as Router } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -18,7 +18,9 @@ root.render(
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Router>
-            <App />
+            <Routes>
+              <Route path="*" element={<App />} />
+            </Routes>
           </Router>
         </ThemeProvider>
       </PersistGate>

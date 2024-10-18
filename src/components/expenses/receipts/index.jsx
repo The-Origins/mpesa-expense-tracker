@@ -60,44 +60,40 @@ const ParseReceipts = () => {
   };
 
   return (
-    <Box
-      display={"flex"}
-      width={"100%"}
-      height={"100vh"}
-      padding={"40px"}
-      position={"relative"}
-    >
+    <Box display={"flex"} width={"100%"} height={"100vh"} position={"relative"}>
       {status.on && <StatusComponent {...{ status, setStatus }} isAbsolute />}
-      {
-        [
-          <AddReciepts handleData={handleData} />,
-          <ExpensesTable
-            {...{
-              setStage,
-              setStatus,
-              receiptFailed,
-              receiptExpenses,
-              setReceiptExpenses,
-              receiptStatistics,
-              setReceiptStatistics,
-              suggestions,
-              setSuggestions,
-              handleSubmit,
-            }}
-          />,
-          <FailedExpenseTable
-            {...{
-              receiptFailed,
-              receiptStatistics,
-              receiptExpenses,
-              setReceiptExpenses,
-              setReceiptStatistics,
-              setReceiptFailed,
-              setStage,
-            }}
-          />,
-        ][stage]
-      }
+      <Box width={"100%"} height={"100%"} padding={"40px"}>
+        {
+          [
+            <AddReciepts handleData={handleData} />,
+            <ExpensesTable
+              {...{
+                setStage,
+                setStatus,
+                receiptFailed,
+                receiptExpenses,
+                setReceiptExpenses,
+                receiptStatistics,
+                setReceiptStatistics,
+                suggestions,
+                setSuggestions,
+                handleSubmit,
+              }}
+            />,
+            <FailedExpenseTable
+              {...{
+                receiptFailed,
+                receiptStatistics,
+                receiptExpenses,
+                setReceiptExpenses,
+                setReceiptStatistics,
+                setReceiptFailed,
+                setStage,
+              }}
+            />,
+          ][stage]
+        }
+      </Box>
     </Box>
   );
 };

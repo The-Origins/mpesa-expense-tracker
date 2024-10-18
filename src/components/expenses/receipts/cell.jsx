@@ -1,5 +1,4 @@
 import {
-  Autocomplete,
   ClickAwayListener,
   TextField,
   Typography,
@@ -15,7 +14,6 @@ const Cell = ({
   input,
   handleChange,
   handleSave,
-  suggestions,
   format = (value) => value,
   isGrey = false,
   isBold = false,
@@ -23,17 +21,14 @@ const Cell = ({
 }) => {
   const theme = useTheme();
   const [isEdit, setIsEdit] = useState(false);
-  const [open, setOpen] = useState(false);
 
   const onChange = ({ target }) => {
-    setOpen(true);
     handleChange({ target });
   };
 
   const onSave = () => {
     handleSave(name);
     setIsEdit(false);
-    setOpen(false);
   };
 
   const handleClick = () => {
@@ -82,37 +77,7 @@ const Cell = ({
               alignItems: "center",
             }}
           >
-            {suggestions ? (
-              <Autocomplete
-                fullWidth
-                freeSolo
-                disableClearable
-                getOptionLabel={(option) => String(option)}
-                options={suggestions}
-                open={open}
-                onOpen={() => setOpen(true)}
-                onClose={() => setOpen(false)}
-                value={value}
-                onChange={(_, value) => onChange({ target: { name, value } })}
-                renderInput={(params) =>
-                  input ? (
-                    input(params, true)
-                  ) : (
-                    <TextField
-                      {...params}
-                      autoFocus
-                      sx={{ width: "100%", height: "100%" }}
-                      name={name}
-                      value={value}
-                      onChange={onChange}
-                      fullWidth
-                    />
-                  )
-                }
-              />
-            ) : input ? (
-              input()
-            ) : (
+            {input || (
               <TextField
                 autoFocus
                 sx={{ width: "100%", height: "100%" }}

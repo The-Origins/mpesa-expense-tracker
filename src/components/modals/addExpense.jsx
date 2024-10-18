@@ -27,13 +27,12 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
   const navigate = useNavigate();
   const formWorker = new FormWorker();
   const [errors, setErrors] = useState({
-    expense: "required",
     receipient: "required",
     amount: "required",
     ref: "required",
   });
   const [touched, setTouched] = useState({});
-  const [form, setForm] = useState({ expense: "", variant: "", date: dayjs() });
+  const [form, setForm] = useState({ expense: [], date: dayjs() });
 
   const handleFormChange = ({ target }) => {
     setErrors(formWorker.getErrors(errors, target));
@@ -45,20 +44,23 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
   };
 
   const handleFormSubmit = () => {
-    let { expense, variant } = form;
-    if (expense.includes(",")) {
-      [expense] = form.expense.split(",");
-    }
+    let { date, expense, ...rest } = form;
+    const formattedForm = formWorker.formatString(rest);
+    expense = formWorker.formatString(expense, true);
+    date = new Date(date).toISOString();
     add({
-      ...form,
+      ...formattedForm,
+      date,
       expense,
     });
     dispatch(
-      addToDictionary({ key: form.receipient, value: { expense, variant } })
+      addToDictionary({
+        key: formattedForm.receipient,
+        value: expense,
+      })
     );
-    setForm({ expense: "", variant: "", date: dayjs() });
+    setForm({ expense: [], date: dayjs() });
     setErrors({
-      expense: "required",
       receipient: "required",
       amount: "required",
       ref: "required",

@@ -236,7 +236,6 @@ class AppWorker {
         if (statistics[year][month][week]) {
           const { total, entries, expenses, ...rest } =
             statistics[year][month][week];
-          console.log(rest);
           let pie = [];
           let line = {
             lables: [],
@@ -272,8 +271,7 @@ class AppWorker {
             .format("YYYY-MM-DD")}/${weekEnd
             .set("date", weekEnd.date() - 7)
             .format("YYYY-MM-DD")}`;
-
-          console.log(previousWeek, week);
+            
           data = {
             ...data,
             "this week": {

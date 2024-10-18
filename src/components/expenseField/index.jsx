@@ -1,97 +1,136 @@
-import { IconButton, InputAdornment, TextField } from "@mui/material";
-import React, { useState } from "react";
-import FormWorker from "../../utils/formWorker";
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import {
+  Autocomplete,
+  TextField,
+  Chip,
+  Tooltip,
+} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const ExpenseField = ({
-  params,
-  autofocus = false,
   style = { width: "200px", flexGrow: 1 },
+  autoFocus = false,
+  disableLabel = false,
   form,
   setForm,
-  errors,
-  setErrors,
   touched,
   setTouched,
 }) => {
-  const formWorker = new FormWorker();
-  const [expenseScope, setExpenseScope] = useState("expense");
-  const [helperText, setHelperText] = useState("");
-  const [label, setLabel] = useState("Expense");
+  const dictionary = useSelector((state) => state.dictionary);
+  const [inputValue, setInputValue] = useState(""); // Track the input field's value
+  const [error, setError] = useState("required"); // Track if the input field has an error
+  const [suggestions, setSuggestions] = useState(["Unkown"]);
+  const [open, setOpen] = useState(false);
 
-  const handleChange = ({ target }) => {
-    if (target.name === "expense") {
-      setErrors((prev) => formWorker.getErrors(prev, target));
-      const [variant] = target.value.split(",").slice(1);
-      setForm((prev) => ({
-        ...prev,
-        expense: target.value,
-        variant: variant ? variant.trim() : "",
-      }));
-    } else if (target.name === "variant") {
-      setForm((prev) => {
-        const [expense] = prev.expense.split(",");
-        return {
-          ...prev,
-          expense: target.value ? expense + ", " + target.value : expense,
-          variant: target.value,
-        };
+  useEffect(() => {
+    if (form.expense && form.expense.length) {
+      setError(null);
+    } else {
+      setError("required");
+    }
+  }, [form]);
+
+  useEffect(() => {
+    if (dictionary && dictionary.expenses) {
+      Object.keys(dictionary.expenses).forEach((key) => {
+        setSuggestions((prev) => {
+          const suggestion = dictionary.expenses[key].join(", ");
+          if (!prev.includes(suggestion)) {
+            return [...prev, suggestion];
+          } else {
+            return prev;
+          }
+        });
       });
     }
-  };
-  const handleFocus = () => {
-    setHelperText(
-      "You can seperate expense variants with a comma. E.g. 'Transport, taxi'"
-    );
+  }, [dictionary]);
+
+  const setExpense = (value) => {
+    if (typeof value === "function") {
+      setForm((prev) => ({ ...prev, expense: value(prev.expense) }));
+    } else {
+      setForm((prev) => ({ ...prev, expense: value }));
+    }
   };
 
-  const switchScope = (scope) => {
-    setExpenseScope(scope);
-    setLabel(scope.charAt(0).toUpperCase() + scope.slice(1));
+  const handleChange = (event, newChips) => {
+    if (event.target.textContent && event.target.textContent.includes(",")) {
+      setExpense((prev) => [...prev, ...event.target.textContent.split(",")]);
+    } else {
+      setExpense(newChips);
+    }
   };
 
   const handleBlur = () => {
     setTouched((prev) => ({ ...prev, expense: true }));
-    if (!errors.expense) {
-      setHelperText("");
+    if (inputValue.trim()) {
+      setExpense((prev) => [...prev, inputValue.trim()]);
+      setInputValue("");
     }
-    switchScope("expense");
+  };
+
+  // Handle adding values to chips when Enter or comma is pressed
+  const handleAddChip = (event) => {
+    const value = event.target.value;
+
+    if ((event.key === "Enter" || event.key === ",") && value.trim()) {
+      event.preventDefault(); // Prevent form submission or default behavior
+      setExpense((prev) => [...prev, value.trim()]); // Add chip
+      setInputValue(""); // Clear input field
+    }
+  };
+
+  // Handle chip deletion
+  const handleDeleteChip = (chipToDelete) => {
+    setExpense((prev) => prev.filter((chip) => chip !== chipToDelete)); // Remove chip
   };
 
   return (
-    <TextField
-      {...params}
-      autofocus={autofocus}
-      label={label}
-      name={expenseScope}
-      value={form[expenseScope]}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onChange={handleChange}
-      helperText={(touched.expense && errors.expense) || helperText}
-      error={errors.expense && touched.expense}
-      sx={style}
-      slotProps={{
-        input: {
-          startAdornment: expenseScope === "variant" && (
-            <InputAdornment>
-              <IconButton onClick={() => switchScope("expense")}>
-                <ChevronLeft />
-              </IconButton>
-            </InputAdornment>
-          ),
-          endAdornment: Boolean(form.variant) &&
-            Boolean(form.variant.length) &&
-            expenseScope === "expense" && (
-              <InputAdornment>
-                <IconButton onClick={() => switchScope("variant")}>
-                  <ChevronRight />
-                </IconButton>
-              </InputAdornment>
-            ),
-        },
-      }}
-    />
+    <Tooltip
+      title={
+        "Separate multiple expenses with a comma or press Enter after each expense. Eg. Transport, Taxi"
+      }
+      placement="right"
+      arrow
+      sx={{ bgcolor: "white" }}
+    >
+      <Autocomplete
+        multiple
+        freeSolo
+        disableClearable
+        open={open}
+        onOpen={() => setOpen(true)}
+        onClose={() => setOpen(false)}
+        options={suggestions}
+        value={form.expense}
+        sx={{ ...style }}
+        onChange={handleChange}
+        inputValue={inputValue}
+        onInputChange={(event, newInputValue) => setInputValue(newInputValue)}
+        renderTags={(value, getTagProps) =>
+          value.map((option, index) => (
+            <Chip
+              key={index}
+              label={option}
+              {...getTagProps({ index })}
+              onDelete={() => handleDeleteChip(option)}
+            />
+          ))
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            autoFocus={autoFocus}
+            variant="outlined"
+            label={disableLabel ? "" : "Expense"}
+            onBlur={handleBlur}
+            onKeyDown={handleAddChip}
+            error={touched.expense && Boolean(error)}
+            helperText={(touched.expense && error) || " "}
+          />
+        )}
+      />
+    </Tooltip>
   );
 };
 

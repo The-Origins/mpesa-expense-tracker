@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Cell from "./cell";
-import { Box, } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import dayjs from "dayjs";
 import { useDispatch } from "react-redux";
 import { addToDictionary } from "../../../state/dictionary";
+import ExpenseField from "../../expenseField";
+import FormWorker from "../../../utils/formWorker";
 
 const ExpenseComponent = ({
   index,
@@ -13,6 +15,9 @@ const ExpenseComponent = ({
   setSuggestions,
 }) => {
   const dispatch = useDispatch();
+  const formworker = new FormWorker();
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [form, setForm] = useState(expense);
 
   const handleSave = (name) => {
@@ -52,7 +57,14 @@ const ExpenseComponent = ({
     }
   };
 
+  const handleTouched = ({ target }) => {
+    setTouched((prev) => ({ ...prev, [target.name]: true }));
+  };
+
   const handleChange = ({ target }) => {
+    if (target.name === "ref") {
+      setErrors((prev) => formworker.getErrors(prev, target));
+    }
     setForm((prev) => ({
       ...prev,
       [target.name]: target.value,
@@ -72,7 +84,20 @@ const ExpenseComponent = ({
         handleChange={handleChange}
         handleSave={handleSave}
         suggestions={suggestions.expense}
-        
+        input={
+          <ExpenseField
+            autoFocus
+            {...{
+              form,
+              setForm,
+              errors,
+              setErrors,
+              touched,
+              setTouched,
+              style: { width: "100%", height: "100%" },
+            }}
+          />
+        }
       />
       <Cell
         index={`${index}2`}
@@ -110,6 +135,18 @@ const ExpenseComponent = ({
         value={form.ref}
         handleChange={handleChange}
         handleSave={handleSave}
+        input={() => (
+          <TextField
+            label="Ref"
+            name="ref"
+            value={form.ref}
+            onBlur={handleTouched}
+            onChange={handleChange}
+            helperText={(touched.ref && errors.ref) || " "}
+            error={touched.ref && Boolean(errors.ref)}
+            sx={{ flexGrow: 1 }}
+          />
+        )}
       />
     </Box>
   );

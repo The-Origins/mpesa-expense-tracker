@@ -36,7 +36,6 @@ export const generatePalette = (count, baseColor = null) => {
     const baseHSL = hexToHsl(baseColor);
     hue = baseHSL.h;
     saturation = baseHSL.s;
-    console.log(baseHSL);
   }
 
   let lightness = 40;

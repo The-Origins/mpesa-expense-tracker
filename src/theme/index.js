@@ -11,6 +11,23 @@ const theme = createTheme({
     primary: { main: "#02B2AF" },
   },
   components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.3)",
+        },
+      },
+      variants: [
+        {
+          props: { variant: "hover" },
+          style: {
+            transition: "0.3s",
+            cursor: "pointer",
+            ":hover": { boxShadow: "0px 0px 10px 0px rgba(0,0,0,0.4)" },
+          },
+        },
+      ],
+    },
     MuiButton: {
       variants: [
         {

@@ -3,6 +3,7 @@ import {
   TextField,
   Chip,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -11,22 +12,29 @@ const ExpenseField = ({
   style = { width: "200px", flexGrow: 1 },
   autoFocus = false,
   disableLabel = false,
+  disableTooltip = false,
   form,
   setForm,
   touched,
   setTouched,
+  errors,
+  setErrors,
+  initialValue,
+  setChanged,
 }) => {
   const dictionary = useSelector((state) => state.dictionary);
   const [inputValue, setInputValue] = useState(""); // Track the input field's value
-  const [error, setError] = useState("required"); // Track if the input field has an error
-  const [suggestions, setSuggestions] = useState(["Unkown"]);
+  const [suggestions, setSuggestions] = useState(["unknown"]);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (form.expense && form.expense.length) {
-      setError(null);
+      setErrors((prev) => {
+        const { expense, ...rest } = prev;
+        return rest;
+      });
     } else {
-      setError("required");
+      setErrors((prev) => ({ ...prev, expense: "required" }));
     }
   }, [form]);
 
@@ -46,10 +54,24 @@ const ExpenseField = ({
   }, [dictionary]);
 
   const setExpense = (value) => {
+    let result;
     if (typeof value === "function") {
-      setForm((prev) => ({ ...prev, expense: value(prev.expense) }));
+      result = value(form.expense || []);
+      setForm((prev) => ({ ...prev, expense: result }));
     } else {
-      setForm((prev) => ({ ...prev, expense: value }));
+      result = value;
+      setForm((prev) => ({ ...prev, expense: result }));
+    }
+
+    if (initialValue) {
+      if (result.join(",") !== initialValue.join(",")) {
+        setChanged((prev) => ({ ...prev, expense: true }));
+      } else {
+        setChanged((prev) => {
+          const { expense, ...rest } = prev;
+          return rest;
+        });
+      }
     }
   };
 
@@ -88,7 +110,9 @@ const ExpenseField = ({
   return (
     <Tooltip
       title={
-        "Separate multiple expenses with a comma or press Enter after each expense. Eg. Transport, Taxi"
+        disableTooltip
+          ? ""
+          : "Separate multiple expenses with a comma or press Enter after each expense. Eg. Transport, Taxi"
       }
       placement="right"
       arrow
@@ -102,7 +126,7 @@ const ExpenseField = ({
         onOpen={() => setOpen(true)}
         onClose={() => setOpen(false)}
         options={suggestions}
-        value={form.expense}
+        value={form.expense || []}
         sx={{ ...style }}
         onChange={handleChange}
         inputValue={inputValue}
@@ -117,6 +141,11 @@ const ExpenseField = ({
             />
           ))
         }
+        renderOption={(props, option) => (
+          <Typography {...props} component={"li"}>
+            {option.charAt(0).toUpperCase() + option.substring(1)}
+          </Typography>
+        )}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -125,8 +154,8 @@ const ExpenseField = ({
             label={disableLabel ? "" : "Expense"}
             onBlur={handleBlur}
             onKeyDown={handleAddChip}
-            error={touched.expense && Boolean(error)}
-            helperText={(touched.expense && error) || " "}
+            error={touched.expense && Boolean(errors.expense)}
+            helperText={(touched.expense && errors.expense) || " "}
           />
         )}
       />

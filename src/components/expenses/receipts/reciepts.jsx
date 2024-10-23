@@ -4,7 +4,7 @@ import ExpenseWorker from "../../../utils/expenseWorker";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const AddReciepts = ({ handleData }) => {
+const AddReciepts = ({ handleReceiptData }) => {
   const navigate = useNavigate();
   const [receipts, setReceipts] = useState("");
   const statistics = useSelector((state) => state.statistics);
@@ -19,7 +19,7 @@ const AddReciepts = ({ handleData }) => {
     const expenseWorker = new ExpenseWorker();
     const mutableStatistics = JSON.parse(JSON.stringify(statistics));
 
-    handleData(
+    handleReceiptData(
       expenseWorker.fetchExpenses(receipts, dictionary, mutableStatistics)
     );
   };

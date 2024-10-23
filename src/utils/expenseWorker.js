@@ -3,12 +3,60 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
 class ExpenseWorker {
+  fetchResults(search, expenses, sort, page, rowsPerPage) {
+    let filteredExpenses = expenses;
+    if (search) {
+      filteredExpenses = expenses.filter((expense) => {
+        expense.date = dayjs(expense.date).format("MMMM DD YYYY, HH:MM");
+        let searchExpenses = JSON.stringify(expense).toLowerCase();
+        return searchExpenses.indexOf(search.toLowerCase()) !== -1;
+      });
+    }
+
+    if (sort) {
+      filteredExpenses = filteredExpenses.sort((a, b) => {
+        if (sort.order === "asc") {
+          if (sort.key === "date") {
+            return new Date(a[sort.key]) - new Date(b[sort.key]);
+          }
+          if (sort.key === "expense") {
+            return a[sort.key].join(", ") > b[sort.key].join(", ") ? 1 : -1;
+          }
+          return a[sort.key] > b[sort.key] ? 1 : -1;
+        } else {
+          if (sort.key === "date") {
+            return new Date(b[sort.key]) - new Date(a[sort.key]);
+          }
+          if (sort.key === "expense") {
+            return a[sort.key].join(", ") < b[sort.key].join(", ") ? 1 : -1;
+          }
+          return a[sort.key] < b[sort.key] ? 1 : -1;
+        }
+      });
+    }
+
+    const start = page * rowsPerPage;
+    const end = start + rowsPerPage;
+    const slicedExpenses = filteredExpenses.slice(start, end);
+
+    return slicedExpenses;
+  }
+
+  generateId = (ref, index) => {
+    const date = new Date();
+    return {
+      id: ref + date.getTime() + index,
+      createdAt: date.toISOString(Date.now()),
+      modifiedAt: date.toISOString(Date.now()),
+    };
+  };
+
   retriveInfo(receipt) {
     dayjs.extend(customParseFormat);
     // Regular expressions for extracting each part
     const refNoRegex = /^[A-Z0-9]+/; // Reference number at the start
     const amountRegex = /Ksh(\d{1,3}(,\d{3})*(\.\d{2})?)/; // Amount in format KshX,XXX.XX
-    const nameRegex = /to ([A-Z\s-]+|\S+\s+\S+)/i; // Name of the recipient
+    const nameRegex = /to\s+([A-Z0-9\s'-]+?)(?=\s+on|\.)/gi; // Name of the recipient
     const airtimeRegex = /You bought Ksh\d{1,3}(,\d{3})*(\.\d{2})? of airtime/i;
     const dateRegex = /on (\d{1,2}\/\d{1,2}\/\d{2,4})/; // Date after 'on'
     const timeRegex = /at (\d{1,2}:\d{2} (?:AM|PM))/; // Time in 12-hour format (AM/PM)
@@ -41,7 +89,10 @@ class ExpenseWorker {
       : receipt.match(airtimeRegex)
       ? "airtime"
       : receipt.match(nameRegex)
-      ? String(receipt.match(nameRegex)[1].trim()).replace(" on", "")
+      ? receipt
+          .match(nameRegex)[0]
+          .replace(/^to\s+/i, "")
+          .trim()
       : null;
 
     const account = receipt.match(accountRegex)
@@ -129,7 +180,7 @@ class ExpenseWorker {
             continue;
           }
 
-          info.expense = ["Unknown"];
+          info.expense = ["unknown"];
           if (dictionary) {
             if (dictionary.expenses[info.receipient]) {
               info.expense = dictionary.expenses[info.receipient];
@@ -152,7 +203,11 @@ class ExpenseWorker {
     return { statistics, expenses, failed };
   }
 
-  addExpense(statistics, expenses, expense) {
+  addExpense(
+    statistics = { all: { total: 0, entries: 0, expenses: {} } },
+    expenses,
+    expense
+  ) {
     const expenseDate = dayjs(expense.date);
     let weekStart = dayjs(expense.date).set(
       "date",
@@ -222,15 +277,15 @@ class ExpenseWorker {
       expense
     );
 
+    if (!expense.id) {
+      expense = {
+        ...expense,
+        ...this.generateId(expense.ref, expenses.length),
+      };
+    } else {
+      expense.modifiedAt = new Date().toISOString();
+    }
     expenses.push(expense);
-
-    //sort expenses by date
-    expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    console.log({
-      statistics,
-      expenses,
-    });
 
     return {
       statistics,
@@ -260,11 +315,162 @@ class ExpenseWorker {
     }
   }
 
+  editExpense(statistics, expenses, previous, update) {
+    const deleted = this.deleteExpense(statistics, expenses, previous);
+    statistics = deleted.statistics;
+    expenses = deleted.expenses;
+    const added = this.addExpense(statistics, expenses, update);
+    statistics = added.statistics;
+    expenses = added.expenses;
+    return {
+      statistics,
+      expenses,
+    };
+  }
+
+  deleteExpense(statistics, expenses, expense) {
+    const expenseDate = dayjs(expense.date);
+    let weekStart = dayjs(expense.date).set(
+      "date",
+      expenseDate.date() - expenseDate.day()
+    );
+    let weekEnd = dayjs(expense.date).set("date", weekStart.date() + 6);
+    const expenseWeek = `${weekStart.format("YYYY-MM-DD")}/${weekEnd.format(
+      "YYYY-MM-DD"
+    )}`;
+    const expenseDay = expenseDate.format("YYYY-MM-DD");
+    const expenseMonth = expenseDate.month();
+    const expenseYear = expenseDate.year();
+
+    expenses = expenses.filter((item) => item.id !== expense.id);
+
+    statistics.all.total -= Number(expense.amount);
+    statistics.all.entries -= 1;
+
+    this.deleteExpenseFromStatistics(statistics.all, expense);
+
+    statistics[expenseYear].total -= Number(expense.amount);
+    statistics[expenseYear].entries -= 1;
+    if (
+      statistics[expenseYear].total <= 0 &&
+      statistics[expenseYear].entries <= 0
+    ) {
+      delete statistics[expenseYear];
+      return {
+        statistics,
+        expenses,
+      };
+    }
+
+    this.deleteExpenseFromStatistics(statistics[expenseYear], expense);
+
+    statistics[expenseYear][expenseMonth].total -= Number(expense.amount);
+    statistics[expenseYear][expenseMonth].entries -= 1;
+
+    if (
+      statistics[expenseYear][expenseMonth].total <= 0 &&
+      statistics[expenseYear][expenseMonth].entries <= 0
+    ) {
+      delete statistics[expenseYear][expenseMonth];
+      return {
+        statistics,
+        expenses,
+      };
+    }
+
+    this.deleteExpenseFromStatistics(
+      statistics[expenseYear][expenseMonth],
+      expense
+    );
+
+    statistics[expenseYear][expenseMonth][expenseWeek].total -= Number(
+      expense.amount
+    );
+    statistics[expenseYear][expenseMonth][expenseWeek].entries -= 1;
+
+    if (
+      statistics[expenseYear][expenseMonth][expenseWeek].total <= 0 &&
+      statistics[expenseYear][expenseMonth][expenseWeek].entries <= 0
+    ) {
+      delete statistics[expenseYear][expenseMonth][expenseWeek];
+      return {
+        statistics,
+        expenses,
+      };
+    }
+
+    this.deleteExpenseFromStatistics(
+      statistics[expenseYear][expenseMonth],
+      expense
+    );
+
+    statistics[expenseYear][expenseMonth][expenseWeek][expenseDay].total -=
+      Number(expense.amount);
+    statistics[expenseYear][expenseMonth][expenseWeek][expenseDay].entries -= 1;
+
+    if (
+      statistics[expenseYear][expenseMonth][expenseWeek][expenseDay].total <=
+        0 &&
+      statistics[expenseYear][expenseMonth][expenseWeek][expenseDay].entries <=
+        0
+    ) {
+      delete statistics[expenseYear][expenseMonth][expenseWeek][expenseDay];
+      return {
+        statistics,
+        expenses,
+      };
+    }
+
+    this.deleteExpenseFromStatistics(
+      statistics[expenseYear][expenseMonth][expenseWeek],
+      expense
+    );
+
+    return {
+      statistics,
+      expenses,
+    };
+  }
+
+  deleteExpenseFromStatistics(statistics, info) {
+    let current = statistics.expenses || {};
+
+    // Loop through the expense array to nest each item
+    for (let i = 0; i < info.expense.length; i++) {
+      const expense = info.expense[i];
+
+      current[expense] = current[expense] || {
+        total: 0,
+        entries: 0,
+        expenses: {},
+      };
+
+      // Update the total and entries for the current expense level
+      current[expense].total -= Number(info.amount);
+      current[expense].entries -= 1;
+
+      if (current[expense].total <= 0 && current[expense].entries <= 0) {
+        delete current[expense];
+        return;
+      }
+
+      // Move to the next nested level (expenses)
+      current = current[expense].expenses;
+    }
+  }
+
   async export(expenses) {
     return new Promise((resolve, reject) => {
       try {
+        const formatedExpenses = expenses.map((item) => ({
+          expense: item.expense.join(", "),
+          receipient: item.receipient,
+          amount: item.amount,
+          date: dayjs(item.date).format("MMM DD YYYY, HH:MM"),
+          ref: item.ref,
+        }));
         const workbook = XLSX.utils.book_new();
-        const worksheet = XLSX.utils.json_to_sheet(expenses);
+        const worksheet = XLSX.utils.json_to_sheet(formatedExpenses);
         XLSX.utils.book_append_sheet(workbook, worksheet, `expenses`);
         resolve(
           XLSX.writeFile(workbook, "expenses.xlsx", { bookType: "xlsx" })

@@ -1,4 +1,4 @@
-import { Add, Close, Receipt, UploadFile } from "@mui/icons-material";
+import { Add, Close, Edit, Receipt, UploadFile } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormWorker from "../../utils/formWorker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { renderTimeViewClock } from "@mui/x-date-pickers/timeViewRenderers";
@@ -22,7 +22,14 @@ import { useDispatch } from "react-redux";
 import { addToDictionary } from "../../state/dictionary";
 import ExpenseField from "../expenseField";
 
-const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
+const ExpenseModal = ({
+  type = "add",
+  open,
+  handleClose,
+  value,
+  onComplete,
+  disableOptions = false,
+}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const formWorker = new FormWorker();
@@ -32,30 +39,74 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
     ref: "required",
   });
   const [touched, setTouched] = useState({});
-  const [form, setForm] = useState({ expense: [], date: dayjs() });
+  const [changed, setChanged] = useState({});
+  const [form, setForm] = useState({ date: dayjs() });
+
+  useEffect(() => {
+    if (value) {
+      setForm({ ...value, date: dayjs(value.date) });
+      setErrors({});
+    } else {
+      setForm({ date: dayjs() });
+      setErrors({
+        receipient: "required",
+        amount: "required",
+        ref: "required",
+      });
+    }
+  }, [value]);
 
   const handleFormChange = ({ target }) => {
     setErrors(formWorker.getErrors(errors, target));
     setForm((prev) => ({ ...prev, [target.name]: target.value }));
+    if (value) {
+      if (String(value[target.name]) !== target.value) {
+        setChanged((prev) => ({ ...prev, [target.name]: true }));
+      } else {
+        setChanged((prev) => {
+          const { [target.name]: value, ...rest } = prev;
+          return rest;
+        });
+      }
+    }
   };
 
   const handleDateChange = (date) => {
-    setForm((prev) => ({ ...prev, date }));
+    if (new Date(date) !== "Invalid Date" && !isNaN(new Date(date))) {
+      setForm((prev) => ({ ...prev, date }));
+      if (value) {
+        if (
+          new Date(value.date).toISOString() !== new Date(date).toISOString()
+        ) {
+          setChanged((prev) => ({ ...prev, date: true }));
+        } else {
+          setChanged((prev) => {
+            const { date, ...rest } = prev;
+            return rest;
+          });
+        }
+      }
+    } else {
+      setErrors((prev) => ({ ...prev, date: "Invalid Date" }));
+    }
   };
 
   const handleFormSubmit = () => {
-    let { date, expense, ...rest } = form;
-    const formattedForm = formWorker.formatString(rest);
+    let { date, expense, receipient, ref, ...rest } = form;
+    receipient = formWorker.formatString(receipient);
+    ref = formWorker.formatString(ref);
     expense = formWorker.formatString(expense, true);
     date = new Date(date).toISOString();
-    add({
-      ...formattedForm,
+    onComplete({
+      ...rest,
+      receipient,
+      ref,
       date,
       expense,
     });
     dispatch(
       addToDictionary({
-        key: formattedForm.receipient,
+        key: receipient,
         value: expense,
       })
     );
@@ -66,23 +117,24 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
       ref: "required",
     });
     setTouched({});
+    setChanged({});
+    onClose();
+  };
+
+  const onClose = () => {
+    setTouched({});
+    setChanged({});
     handleClose();
   };
 
   const handleTouched = ({ target }) => {
     setTouched((prev) => ({ ...prev, [target.name]: true }));
   };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={onClose}>
         <Box
           width={"min(600px, 90%)"}
-          position={"relative"}
           borderRadius={"10px"}
           bgcolor={"white"}
           sx={{
@@ -100,7 +152,7 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
             padding={"10px"}
             justifyContent={"flex-end"}
           >
-            <IconButton onClick={handleClose}>
+            <IconButton onClick={onClose}>
               <Close />
             </IconButton>
           </Box>
@@ -115,7 +167,7 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
               fontSize={"1.2rem"}
               textAlign={"center"}
             >
-              Add expense
+              {type.charAt(0).toUpperCase() + type.substring(1) + " Expense"}
             </Typography>
             <Box display={"flex"} gap={"10px"} flexWrap={"wrap"}>
               <ExpenseField
@@ -126,7 +178,9 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
                   setErrors,
                   touched,
                   setTouched,
+                  setChanged,
                 }}
+                initialValue={value?.expense}
               />
               <TextField
                 label="Receipient"
@@ -189,7 +243,7 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
                     fullWidth
                     variant="outlined"
                     startIcon={<Receipt />}
-                    onClick={() => navigate("/expenses/receipts")}
+                    onClick={() => navigate("/expenses/receipts/add")}
                   >
                     Use Receipts
                   </Button>
@@ -205,7 +259,7 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
               </>
             )}
             <Box display={"flex"} justifyContent={"space-between"} mt={"20px"}>
-              <Button size="large" variant="outlined" onClick={handleClose}>
+              <Button size="large" variant="outlined" onClick={onClose}>
                 Cancel
               </Button>
               <Button
@@ -213,10 +267,15 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
                 variant="contained"
                 disableElevation
                 onClick={handleFormSubmit}
-                disabled={Object.keys(errors).length}
-                startIcon={<Add />}
+                disabled={
+                  Object.keys(errors).length ||
+                  (value && !Object.keys(changed).length)
+                }
+                startIcon={
+                  type === "add" ? <Add /> : type === "edit" ? <Edit /> : null
+                }
               >
-                Add
+                {type.charAt(0).toUpperCase() + type.substring(1)}
               </Button>
             </Box>
           </Box>
@@ -226,4 +285,4 @@ const AddExpenseModal = ({ open, setOpen, add, disableOptions = false }) => {
   );
 };
 
-export default AddExpenseModal;
+export default ExpenseModal;

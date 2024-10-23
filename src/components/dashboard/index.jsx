@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import DashboardExpense from "./expense";
 import CustomPieChart from "../pieChart";
 import AppWorker from "../../utils/appWorker";
-import AddExpenseModal from "../modals/addExpense";
+import ExpenseModal from "../modals/expense";
 import ExpenseWorker from "../../utils/expenseWorker";
 import { setStatistics } from "../../state/statistics";
 import { setExpenses } from "../../state/expenses";
@@ -19,7 +19,7 @@ const Dashboard = () => {
   const statistics = useSelector((state) => state.statistics);
   const [scope, setScope] = useState("all time");
   const [data, setData] = useState(null);
-  const [isAddModal, setisAddModal] = useState(false);
+  const [isExpenseModal, setIsExpenseModal] = useState(false);
 
   const addExpense = (expense) => {
     const expenseWorker = new ExpenseWorker();
@@ -46,10 +46,10 @@ const Dashboard = () => {
 
   return (
     <Box width={"100%"} display={"flex"}>
-      <AddExpenseModal
-        open={isAddModal}
-        setOpen={setisAddModal}
-        add={addExpense}
+      <ExpenseModal
+        open={isExpenseModal}
+        handleClose={() => setIsExpenseModal(false)}
+        onComplete={addExpense}
       />
       <Box
         width={"100%"}
@@ -131,7 +131,7 @@ const Dashboard = () => {
                   disableElevation
                   variant="contained"
                   startIcon={<Add />}
-                  onClick={() => setisAddModal(true)}
+                  onClick={() => setIsExpenseModal(true)}
                 >
                   add expense
                 </Button>
@@ -151,7 +151,7 @@ const Dashboard = () => {
               <Button
                 variant="contained"
                 disableElevation
-                onClick={() => setisAddModal(true)}
+                onClick={() => setIsExpenseModal(true)}
               >
                 Add expense
               </Button>

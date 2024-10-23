@@ -42,6 +42,7 @@ const App = () => {
     dispatch(setExpenses(samples.expenses));
     dispatch(setStatistics(samples.statistics));
     dispatch(setFailed(samples.failed));
+    dispatch(resetDictionary());
   };
 
   return (
@@ -137,7 +138,7 @@ const App = () => {
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/expenses" element={<Expenses />} />
-        <Route path="/expenses/receipts" element={<ParseReceipts />} />
+        <Route path="/expenses/receipts/*" element={<ParseReceipts />} />
       </Routes>
     </Box>
   );

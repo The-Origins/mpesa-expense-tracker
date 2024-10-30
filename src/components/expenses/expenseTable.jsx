@@ -137,14 +137,18 @@ const ExpensesTable = ({
   };
 
   const handleNoResults = () => {
-    if (search.length) {
-      setSearch("");
-    } else {
-      setExpenseModalInfo({
-        open: true,
-        type: "add",
-        onComplete: addExpense,
-      });
+    if (tab === 0) {
+      if (search.length) {
+        setSearch("");
+      } else {
+        setExpenseModalInfo({
+          open: true,
+          type: "add",
+          onComplete: addExpense,
+        });
+      }
+    } else if (tab === 1) {
+      setTab(0);
     }
   };
 
@@ -432,41 +436,6 @@ const ExpensesTable = ({
                 </TableBody>
               </Table>
             </TableContainer>
-            {!results.length && (
-              <Box
-                width={"100%"}
-                display={"flex"}
-                alignItems={"center"}
-                flexDirection={"column"}
-                gap={"20px"}
-                padding={"20px"}
-              >
-                <MoneyOff fontSize={"large"} />
-                <Typography>
-                  {search.length
-                    ? `No results found for '${search}'`
-                    : "No expenses found"}
-                </Typography>
-                <Button
-                  variant="contained"
-                  disableElevation
-                  onClick={handleNoResults}
-                >
-                  {search.length ? "Clear search" : "Add new expense"}
-                </Button>
-              </Box>
-            )}
-            <Box height={"60px"} width={"100%"}>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 20]}
-                component="div"
-                count={search.length ? results.length : expenses.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Box>
           </>,
           <TableContainer style={{ maxHeight: "100%" }}>
             <Table
@@ -488,23 +457,74 @@ const ExpensesTable = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {failed.map((expense, index) => (
-                  <FailedExpenseComponent
-                    {...{
-                      index,
-                      expense,
-                      setFailed,
-                      addExpense,
-                      setDeleteModal,
-                      setExpenseModalInfo,
-                    }}
-                  />
-                ))}
+                {failed
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((expense, index) => (
+                    <FailedExpenseComponent
+                      {...{
+                        index,
+                        expense,
+                        setFailed,
+                        addExpense,
+                        setDeleteModal,
+                        setExpenseModalInfo,
+                      }}
+                    />
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>,
         ][tab]
       }
+      {(tab === 0 && !results.length) || (tab === 1 && !failed.length) ? (
+        <Box
+          width={"100%"}
+          display={"flex"}
+          alignItems={"center"}
+          flexDirection={"column"}
+          gap={"20px"}
+          padding={"20px"}
+        >
+          <MoneyOff fontSize={"large"} />
+          <Typography>
+            {tab === 0
+              ? search.length
+                ? `No results found for '${search}'`
+                : "No expenses found"
+              : tab === 1 && "No remaining failed expenses"}
+          </Typography>
+          <Button
+            variant="contained"
+            disableElevation
+            onClick={handleNoResults}
+          >
+            {tab === 0
+              ? search.length
+                ? "Clear search"
+                : "Add new expense"
+              : tab === 1 && "Go to expenses"}
+          </Button>
+        </Box>
+      ) : (
+        <></>
+      )}
+      <Box height={"60px"} width={"100%"}>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 20]}
+          component="div"
+          count={
+            tab === 0
+              ? search.length
+                ? results.length
+                : expenses.length
+              : failed.length
+          }
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </Box>
     </Paper>
   );
 };

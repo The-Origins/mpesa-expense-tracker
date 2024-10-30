@@ -8,6 +8,7 @@ import StatusComponent from "../../status";
 import { setExpenses } from "../../../state/expenses";
 import { setFailed } from "../../../state/failed";
 import { setStatistics } from "../../../state/statistics";
+import { ExitToApp } from "@mui/icons-material";
 
 const ParseReceipts = () => {
   const navigate = useNavigate();
@@ -69,7 +70,12 @@ const ParseReceipts = () => {
   const paths = {
     add: <AddReciepts handleReceiptData={handleReceiptData} />,
     edit: (
-      <Box width={"100%"} height={"100%"}>
+      <Box
+        display={"flex"}
+        flexDirection={"column"}
+        width={"100%"}
+        height={"100%"}
+      >
         <ExpensesTable
           failed={receiptFailed}
           setFailed={setReceiptFailed}
@@ -83,7 +89,7 @@ const ParseReceipts = () => {
           width={"100%"}
           display={"flex"}
           justifyContent={"space-between"}
-          padding={"20px"}
+          paddingTop={"20px"}
         >
           <Button
             size="large"
@@ -92,8 +98,14 @@ const ParseReceipts = () => {
           >
             Cancel
           </Button>
-          <Button disableElevation size="large" variant="contained" onClick={handleSubmit}>
-            Save
+          <Button
+            disableElevation
+            size="large"
+            variant="contained"
+            onClick={handleSubmit}
+            startIcon={<ExitToApp />}
+          >
+            Add to expenses
           </Button>
         </Box>
       </Box>

@@ -12,19 +12,28 @@ const Expenses = () => {
   const statistics = useSelector((state) => state.statistics);
   const failed = useSelector((state) => state.failed);
 
-  const mutableExpenses = [...expenses];
+  const mutableExpenses = JSON.parse(JSON.stringify(expenses));
   const mutableStatistics = JSON.parse(JSON.stringify(statistics));
-  const mutableFailed = [...failed];
+  const mutableFailed = JSON.parse(JSON.stringify(failed));
 
   const updateExpenses = (expenses) => {
+    if (typeof expenses === "function") {
+      return dispatch(setExpenses(expenses(mutableExpenses)));
+    }
     dispatch(setExpenses(expenses));
   };
 
   const updateStatistics = (statistics) => {
+    if (typeof statistics === "function") {
+      return dispatch(setStatistics(statistics(mutableStatistics)));
+    }
     dispatch(setStatistics(statistics));
   };
 
   const updateFailed = (failed) => {
+    if (typeof failed === "function") {
+      return dispatch(setFailed(failed(mutableFailed)));
+    }
     dispatch(setFailed(failed));
   };
 

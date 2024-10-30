@@ -45,7 +45,16 @@ const ExpenseModal = ({
   useEffect(() => {
     if (value) {
       setForm({ ...value, date: dayjs(value.date) });
-      setErrors({});
+      if (type === "edit") {
+        setErrors({});
+      } else {
+        setErrors({});
+        Object.keys(value).forEach((key) => {
+          if (!value[key]) {
+            setErrors((prev) => ({ ...prev, [key]: "required" }));
+          }
+        });
+      }
     } else {
       setForm({ date: dayjs() });
       setErrors({
@@ -54,7 +63,7 @@ const ExpenseModal = ({
         ref: "required",
       });
     }
-  }, [value]);
+  }, [value, type]);
 
   const handleFormChange = ({ target }) => {
     setErrors(formWorker.getErrors(errors, target));
@@ -72,12 +81,10 @@ const ExpenseModal = ({
   };
 
   const handleDateChange = (date) => {
-    if (new Date(date) !== "Invalid Date" && !isNaN(new Date(date))) {
-      setForm((prev) => ({ ...prev, date }));
-      if (value) {
-        if (
-          new Date(value.date).toISOString() !== new Date(date).toISOString()
-        ) {
+    setErrors(formWorker.getErrors(errors, { name: "date", value: date }));
+    if (value) {
+      if (!errors.date) {
+        if (new Date(value.date).toISOString() !== date.toISOString()) {
           setChanged((prev) => ({ ...prev, date: true }));
         } else {
           setChanged((prev) => {
@@ -86,9 +93,8 @@ const ExpenseModal = ({
           });
         }
       }
-    } else {
-      setErrors((prev) => ({ ...prev, date: "Invalid Date" }));
     }
+    setForm((prev) => ({ ...prev, date }));
   };
 
   const handleFormSubmit = () => {
@@ -130,6 +136,7 @@ const ExpenseModal = ({
   const handleTouched = ({ target }) => {
     setTouched((prev) => ({ ...prev, [target.name]: true }));
   };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Modal open={open} onClose={onClose}>
@@ -217,14 +224,18 @@ const ExpenseModal = ({
                 label="Select Date"
                 value={form.date}
                 onChange={handleDateChange}
-                renderInput={(params) => <TextField {...params} />}
+                renderInput={(params) => (
+                  <TextField {...params} helperText={errors.date || " "} />
+                )}
                 sx={{ flexGrow: 1 }}
               />
               <TimePicker
                 label="Select Time"
                 value={form.date}
                 onChange={handleDateChange}
-                renderInput={(params) => <TextField {...params} />}
+                renderInput={(params) => (
+                  <TextField {...params} helperText={errors.date || " "} />
+                )}
                 viewRenderers={{
                   hours: renderTimeViewClock,
                   minutes: renderTimeViewClock,
@@ -269,7 +280,7 @@ const ExpenseModal = ({
                 onClick={handleFormSubmit}
                 disabled={
                   Object.keys(errors).length ||
-                  (value && !Object.keys(changed).length)
+                  (value && type === "edit" && !Object.keys(changed).length)
                 }
                 startIcon={
                   type === "add" ? <Add /> : type === "edit" ? <Edit /> : null

@@ -36,7 +36,7 @@ const ExpenseField = ({
     } else {
       setErrors((prev) => ({ ...prev, expense: "required" }));
     }
-  }, [form]);
+  }, [form, setErrors]);
 
   useEffect(() => {
     if (dictionary && dictionary.expenses) {

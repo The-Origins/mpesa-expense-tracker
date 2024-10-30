@@ -23,13 +23,11 @@ const FailedExpenseComponent = ({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    const date = dayjs(expense.info.date);
     setFormattedExpense({
       ...expense.info,
       expense: ["unknown"],
-      date:
-        expense.info.date && expense.info.date !== "Invalid Date"
-          ? dayjs(expense.info.date)
-          : dayjs(),
+      date: date instanceof Date && !isNaN(date) ? date : dayjs(),
     });
   }, [expense]);
 
@@ -38,10 +36,16 @@ const FailedExpenseComponent = ({
     setExpenseModalInfo({
       open: true,
       type: "add",
-      onComplete: addExpense,
+      onComplete: handleAdd,
       value: formattedExpense,
       disableOptions: true,
     });
+  };
+
+  const handleAdd = (expense) => {
+    addExpense(expense);
+    deleteExpense();
+    setOpen(false);
   };
 
   const handleDelete = (event) => {
@@ -49,12 +53,14 @@ const FailedExpenseComponent = ({
     setDeleteModal({
       open: true,
       message: `Are you sure you want to delete this expense?`,
-      onConfirm: () => {
-        setFailed((prev) => {
-          prev.splice(index, 1);
-          return prev;
-        });
-      },
+      onConfirm: deleteExpense,
+    });
+  };
+
+  const deleteExpense = () => {
+    setFailed((prev) => {
+      prev.splice(index, 1);
+      return prev;
     });
   };
 

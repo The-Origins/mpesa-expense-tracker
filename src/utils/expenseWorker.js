@@ -56,7 +56,7 @@ class ExpenseWorker {
     // Regular expressions for extracting each part
     const refNoRegex = /^[A-Z0-9]+/; // Reference number at the start
     const amountRegex = /Ksh(\d{1,3}(,\d{3})*(\.\d{2})?)/; // Amount in format KshX,XXX.XX
-    const nameRegex = /to\s+([A-Z0-9\s'-]+?)(?=\s+on|\.)/gi; // Name of the recipient
+    const nameRegex = /to\s+([A-Z0-9\s'/-]+?)(?=\s+on|\.)/gi; // Name of the recipient
     const airtimeRegex = /You bought Ksh\d{1,3}(,\d{3})*(\.\d{2})? of airtime/i;
     const dateRegex = /on (\d{1,2}\/\d{1,2}\/\d{2,4})/; // Date after 'on'
     const timeRegex = /at (\d{1,2}:\d{2} (?:AM|PM))/; // Time in 12-hour format (AM/PM)

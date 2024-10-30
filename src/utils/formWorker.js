@@ -27,9 +27,17 @@ class FormWorker {
           return "invalid ref";
         }
       },
+      date: (value) => {
+        const date = new Date(value);
+        if (date instanceof Date && !isNaN(date)) {
+          return null;
+        } else {
+          return "invalid date";
+        }
+      },
     };
 
-    if (!target.value.length) {
+    if (!String(target.value).length) {
       return { ...errors, [target.name]: "required" };
     }
 

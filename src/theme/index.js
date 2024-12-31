@@ -11,6 +11,14 @@ const theme = createTheme({
     primary: { main: "#02B2AF" },
   },
   components: {
+    MuiChip: {
+      variants: [
+        {
+          props: { variant: "filled", color: "primary" },
+          style: { color: "white" },
+        },
+      ],
+    },
     MuiPaper: {
       styleOverrides: {
         root: {

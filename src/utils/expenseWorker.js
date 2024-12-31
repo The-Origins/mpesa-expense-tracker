@@ -134,7 +134,7 @@ class ExpenseWorker {
   fetchExpenses(
     receipts,
     dictionary,
-    statistics = { all: { total: 0, entries: 0, expenses: {} } },
+    statistics = { total: 0, entries: 0, expenses: {} },
     expenses = [],
     failed = []
   ) {
@@ -204,7 +204,7 @@ class ExpenseWorker {
   }
 
   addExpense(
-    statistics = { all: { total: 0, entries: 0, expenses: {} } },
+    statistics = { total: 0, entries: 0, expenses: {} },
     expenses,
     expense
   ) {
@@ -214,17 +214,17 @@ class ExpenseWorker {
       expenseDate.date() - expenseDate.day()
     );
     let weekEnd = dayjs(expense.date).set("date", weekStart.date() + 6);
-    const expenseWeek = `${weekStart.format("YYYY-MM-DD")}/${weekEnd.format(
+    const expenseWeek = `${weekStart.format("YYYY-MM-DD")}_${weekEnd.format(
       "YYYY-MM-DD"
     )}`;
     const expenseDay = expenseDate.format("YYYY-MM-DD");
     const expenseMonth = expenseDate.month();
     const expenseYear = expenseDate.year();
 
-    statistics.all.total += Number(expense.amount);
-    statistics.all.entries += 1;
-    statistics.all.expenses = statistics.all.expenses || {};
-    this.addExpenseToStatistics(statistics.all, expense);
+    statistics.total += Number(expense.amount);
+    statistics.entries += 1;
+    statistics.expenses = statistics.expenses || {};
+    this.addExpenseToStatistics(statistics, expense);
 
     statistics[expenseYear] = statistics[expenseYear] || {
       total: 0,
@@ -344,10 +344,10 @@ class ExpenseWorker {
 
     expenses = expenses.filter((item) => item.id !== expense.id);
 
-    statistics.all.total -= Number(expense.amount);
-    statistics.all.entries -= 1;
+    statistics.total -= Number(expense.amount);
+    statistics.entries -= 1;
 
-    this.deleteExpenseFromStatistics(statistics.all, expense);
+    this.deleteExpenseFromStatistics(statistics, expense);
 
     statistics[expenseYear].total -= Number(expense.amount);
     statistics[expenseYear].entries -= 1;

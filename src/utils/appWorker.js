@@ -80,6 +80,91 @@ class AppWorker {
     return years === 1 ? "1 year ago" : `${years} years ago`;
   }
 
+  getPathData = (path, statistics) => {
+    let data = { pie: [], bar: { lables: [], data: [] } };
+    let type = "all";
+    let times = ["year", "month", "week", "day"];
+
+    if (path.length) {
+      for (let index in path) {
+        if (statistics[path[index]]) {
+          statistics = statistics[path[index]];
+          type = times[index];
+        } else if (statistics.expenses && statistics.expenses[path[index]]) {
+          type = "expense";
+          statistics = statistics.expenses[path[index]];
+        } else {
+          path = path.slice(0, index);
+          break;
+        }
+      }
+    }
+    if (type === "expense") {
+      data = this.getExpenseStats(statistics);
+    }else 
+    {
+      data = this.getTimeStats(statistics, type);
+    }
+
+
+    return {data, path}
+  };
+
+  getTimeStats = (statistics, type) => {
+    const format = {
+      month: (date) => dayjs(date).format("MMM"),
+      week: (date) => {
+        let [start, end] = date.split("_");
+        start = dayjs(start);
+        end = dayjs(end);
+        return `${start.format("MMM")} ${this.getDateSuperScript(
+          start.date()
+        )} - ${end.format("MMM")} ${this.getDateSuperScript(end.date())}`;
+      }
+    }
+
+    let pie = [];
+    let bar = {
+      lables: [],
+      data: [],
+    };
+
+    const { total, entries, expenses, ...rest } = statistics;
+
+    Object.keys(rest || {}).forEach((time) => {
+      bar.lables.push(format[type] ? format[type](time) : time);
+      bar.data.push(rest[time].total);
+    });
+
+    Object.keys(expenses || {}).forEach((expense) => {
+      pie.push({
+        id: pie.length,
+        label: `${
+          expense.charAt(0).toUpperCase() + expense.substring(1)
+        } ${this.getPercentage(expenses[expense].total, total)}%`,
+        value: expenses[expense].total,
+      });
+    });
+    return { pie, bar };
+  };
+
+  getExpenseStats = (expense) => {
+    let pie = [];
+    Object.keys(expense.expenses).forEach((variant) => {
+      pie.push({
+        id: pie.length,
+        label: `${
+          variant.charAt(0).toUpperCase() + variant.substring(1)
+        } ${this.getPercentage(
+          expense.expenses[variant].total,
+          expense.total
+        )}%`,
+        value: expense.expenses[variant].total,
+      });
+    });
+    return { pie, bar: { lables: [], data: [] } };
+  };
+
   getDashboardData = async (statistics) => {
     return new Promise((resolve, reject) => {
       try {
@@ -87,7 +172,7 @@ class AppWorker {
         const today = date.format("YYYY-MM-DD");
         const week = `${dayjs(date)
           .set("date", date.date() - date.day())
-          .format("YYYY-MM-DD")}/${dayjs(date)
+          .format("YYYY-MM-DD")}_${dayjs(date)
           .set("date", date.date() - date.day() + 6)
           .format("YYYY-MM-DD")}`;
         const month = date.month();
@@ -95,30 +180,30 @@ class AppWorker {
 
         let data = {};
 
-        if (statistics.all) {
-          const { all, ...rest } = statistics;
+        if (statistics) {
+          const { total, expenses, ...rest } = statistics;
           let pie = [];
-          let line = {
+          let bar = {
             lables: [],
             data: [],
           };
 
-          Object.keys(all.expenses || {}).forEach((expense) => {
+          Object.keys(expenses || {}).forEach((expense) => {
             pie.push({
               id: pie.length,
               label: `${
                 expense.charAt(0).toUpperCase() + expense.substring(1)
-              } ${this.getPercentage(all.expenses[expense].total, all.total)}%`,
-              value: all.expenses[expense].total,
+              } ${this.getPercentage(expenses[expense].total, total)}%`,
+              value: expenses[expense].total,
             });
           });
 
           Object.keys(rest).forEach((year) => {
-            line.lables.push(year);
-            line.data.push(rest[year].total);
+            bar.lables.push(year);
+            bar.data.push(rest[year].total);
           });
 
-          data = { "all time": { pie, line, total: all.total } };
+          data = { "all time": { pie, bar, total: total } };
         } else {
           resolve(data);
         }
@@ -126,7 +211,7 @@ class AppWorker {
         if (statistics[year]) {
           const { total, entries, expenses, ...rest } = statistics[year];
           let pie = [];
-          let line = {
+          let bar = {
             lables: [],
             data: [],
           };
@@ -145,8 +230,8 @@ class AppWorker {
           });
 
           Object.keys(rest).forEach((month) => {
-            line.lables.push(dayjs(date).set("month", month).format("MMM"));
-            line.data.push(statistics[year][month].total);
+            bar.lables.push(dayjs(date).set("month", month).format("MMM"));
+            bar.data.push(statistics[year][month].total);
           });
 
           const previousYear = year - 1;
@@ -154,7 +239,7 @@ class AppWorker {
             ...data,
             "this year": {
               pie,
-              line,
+              bar,
               total: statistics[year].total,
               stat: statistics[previousYear]
                 ? {
@@ -174,7 +259,7 @@ class AppWorker {
         if (statistics[year][month]) {
           const { total, entries, expenses, ...rest } = statistics[year][month];
           let pie = [];
-          let line = {
+          let bar = {
             lables: [],
             data: [],
           };
@@ -193,10 +278,10 @@ class AppWorker {
           });
 
           Object.keys(rest).forEach((week) => {
-            let [weekStart, weekEnd] = week.split("/");
+            let [weekStart, weekEnd] = week.split("_");
             weekStart = dayjs(weekStart);
             weekEnd = dayjs(weekEnd);
-            line.lables.push(
+            bar.lables.push(
               `${
                 weekStart.format("MMM") +
                 " " +
@@ -207,7 +292,7 @@ class AppWorker {
                 this.getDateSuperScript(weekEnd.date())
               }`
             );
-            line.data.push(statistics[year][month][week].total);
+            bar.data.push(statistics[year][month][week].total);
           });
 
           const previousMonth = month - 1;
@@ -216,7 +301,7 @@ class AppWorker {
             ...data,
             "this month": {
               pie,
-              line,
+              bar,
               total: statistics[year][month].total,
               stat: statistics[year][previousMonth]
                 ? {
@@ -237,7 +322,7 @@ class AppWorker {
           const { total, entries, expenses, ...rest } =
             statistics[year][month][week];
           let pie = [];
-          let line = {
+          let bar = {
             lables: [],
             data: [],
           };
@@ -258,8 +343,8 @@ class AppWorker {
           );
 
           Object.keys(rest).forEach((day) => {
-            line.lables.push(this.getTimeAgo(day, today, false, true));
-            line.data.push(statistics[year][month][week][day].total);
+            bar.lables.push(this.getTimeAgo(day, today, false, true));
+            bar.data.push(statistics[year][month][week][day].total);
           });
 
           let [weekStart, weekEnd] = week.split("/");
@@ -271,12 +356,12 @@ class AppWorker {
             .format("YYYY-MM-DD")}/${weekEnd
             .set("date", weekEnd.date() - 7)
             .format("YYYY-MM-DD")}`;
-            
+
           data = {
             ...data,
             "this week": {
               pie,
-              line,
+              bar,
               total: statistics[year][month][week].total,
               stat: statistics[year][month][previousWeek]
                 ? {
@@ -295,7 +380,7 @@ class AppWorker {
 
         if (statistics[year][month][week][today]) {
           let pie = [];
-          let line = data["this week"].line;
+          let bar = data["this week"].bar;
 
           Object.keys(statistics[year][month][week][today].expenses).forEach(
             (expense) => {
@@ -321,7 +406,7 @@ class AppWorker {
             ...data,
             today: {
               pie,
-              line,
+              bar,
               total: statistics[year][month][week][today].total,
               stat: statistics[year][month][week][yesterday]
                 ? {

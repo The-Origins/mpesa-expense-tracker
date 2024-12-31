@@ -21,7 +21,7 @@ const CustomPieChart = ({
   return (
     <Box
       display={"flex"}
-      flexDirection={"column"}
+      flexDirection={legend.position === "bottom" ? "column" : legend.position === "top" ? "column-reverse" : legend.position === "right" ? "row" : "row-reverse"}
       height={`${height}px`}
       width={`${width}px`}
     >

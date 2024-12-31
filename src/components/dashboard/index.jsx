@@ -19,12 +19,13 @@ const Dashboard = () => {
   const statistics = useSelector((state) => state.statistics);
   const [scope, setScope] = useState("all time");
   const [data, setData] = useState(null);
+  const [filteredExpenses, setFilteredExpenses] = useState(expenses || []);
   const [isExpenseModal, setIsExpenseModal] = useState(false);
 
   const addExpense = (expense) => {
     const expenseWorker = new ExpenseWorker();
     const mutableStatistics = JSON.parse(JSON.stringify(statistics));
-    const mutableExpenses = [...expenses];
+    const mutableExpenses = JSON.parse(JSON.stringify(expenses));
     const data = expenseWorker.addExpense(
       mutableStatistics,
       mutableExpenses,
@@ -33,6 +34,19 @@ const Dashboard = () => {
     dispatch(setStatistics(data.statistics));
     dispatch(setExpenses(data.expenses));
   };
+
+  useEffect(() => {
+    const expenseWorker = new ExpenseWorker();
+    setFilteredExpenses(
+      expenseWorker.fetchResults(
+        "",
+        JSON.parse(JSON.stringify(expenses)),
+        { key: "date", order: "desc" },
+        0,
+        3
+      )
+    );
+  }, [expenses]);
 
   useEffect(() => {
     if (Object.keys(statistics).length) {
@@ -185,8 +199,8 @@ const Dashboard = () => {
           </Typography>
           {data ? (
             <BarChart
-              series={[{ data: data[scope].line.data }]}
-              xAxis={[{ scaleType: "band", data: data[scope].line.lables }]}
+              series={[{ data: data[scope].bar.data }]}
+              xAxis={[{ scaleType: "band", data: data[scope].bar.lables }]}
               width={790}
               height={400}
             />
@@ -235,8 +249,8 @@ const Dashboard = () => {
           <Typography fontSize={"1.3rem"} fontWeight={"bold"}>
             Recent expenses
           </Typography>
-          {expenses.length ? (
-            expenses.map((expense, index) => {
+          {filteredExpenses.length ? (
+            filteredExpenses.map((expense, index) => {
               if (index <= 2) {
                 return <DashboardExpense key={expense.id} expense={expense} />;
               }

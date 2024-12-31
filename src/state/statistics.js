@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 const statisticsSlice = createSlice({
   name: "statistics",
-  initialState: {all: { total: 0, entries: 0 }},
+  initialState: { total: 0, entries: 0, expenses: {} },
   reducers: {
     setStatistics: (state, action) => {
       return action.payload;

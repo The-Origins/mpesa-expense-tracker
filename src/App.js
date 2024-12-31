@@ -29,6 +29,7 @@ import { setFailed } from "./state/failed";
 import Expenses from "./components/expenses";
 import ParseReceipts from "./components/expenses/receipts";
 import { resetDictionary } from "./state/dictionary";
+import Statistics from "./components/statistics";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -46,7 +47,7 @@ const App = () => {
   };
 
   return (
-    <Box minHeight={"100vh"} display={"flex"}>
+    <Box minHeight={"100vh"} width={"100%"} display={"flex"}>
       <Box
         height={"100vh"}
         width={open ? "250px" : "80px"}
@@ -135,11 +136,14 @@ const App = () => {
           )}
         </Box>
       </Box>
-      <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/expenses" element={<Expenses />} />
-        <Route path="/expenses/receipts/*" element={<ParseReceipts />} />
-      </Routes>
+      <Box flexGrow={1} minWidth={0}>
+        <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/expenses" element={<Expenses />} />
+          <Route path="/expenses/receipts/*" element={<ParseReceipts />} />
+          <Route path="/statistics/*" element={<Statistics />} />
+        </Routes>
+      </Box>
     </Box>
   );
 };

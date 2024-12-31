@@ -1,6 +1,6 @@
 import { Box, Button } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import AddReciepts from "./reciepts";
+import AddReciepts from "./add";
 import ExpensesTable from "../expenseTable";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -105,7 +105,7 @@ const ParseReceipts = () => {
             onClick={handleSubmit}
             startIcon={<ExitToApp />}
           >
-            Add to expenses
+            Submit
           </Button>
         </Box>
       </Box>

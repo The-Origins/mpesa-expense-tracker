@@ -1,11 +1,10 @@
 const jwt = require("jsonwebtoken");
 
-module.exports = (user) => {
+module.exports = (id) => {
   const expiresIn = "1d";
 
   const payload = {
-    sub: user.id,
-    role: user.role,
+    sub: id,
     iat: Date.now(),
   };
 

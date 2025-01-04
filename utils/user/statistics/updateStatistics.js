@@ -1,6 +1,6 @@
 const { FieldValue } = require("firebase-admin/firestore");
 const db = require("../../../config/db");
-const getExpenseStatistics = require("./getExpenseStatistics");
+const updateExpenseStatistics = require("./updateExpenseStatistics");
 
 module.exports = async (expense, user, operation = "add") => {
   const date = new Date(expense.date);
@@ -15,25 +15,12 @@ module.exports = async (expense, user, operation = "add") => {
     .doc(user.id)
     .collection("statistics")
     .doc("all");
-  const allExpensesRef = allRef.collection("expenses").doc(expense.labels[0]);
-
   //ref for all the user statistics for the year
-  const yearRef = db
-    .collection("users")
-    .doc(user.id)
-    .collection("statistics")
-    .doc(year);
-  const yearExpensesRef = yearRef.collection("expenses").doc(expense.labels[0]);
-
+  const yearRef = allRef.collection("years").doc(year);
   //ref for all the user statistics for the month
   const monthRef = yearRef.collection("months").doc(month);
-  const monthExpensesRef = monthRef
-    .collection("expenses")
-    .doc(expense.labels[0]);
-
   //ref for all the user statistics of the day
   const dateRef = monthRef.collection("days").doc(day);
-  const dateExpensesRef = dateRef.collection("expenses").doc(expense.labels[0]);
 
   //update statistics
 
@@ -47,17 +34,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-
-  const allExpenses = await getExpenseStatistics(
-    allExpensesRef,
-    expense,
-    operation
-  );
-  if (allExpenses !== undefined) {
-    batch.set(allExpensesRef, allExpenses);
-  } else {
-    batch.delete(allExpensesRef);
-  }
+  updateExpenseStatistics(allRef.collection("expenses"), expense, batch);
 
   batch.set(
     yearRef,
@@ -69,16 +46,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-  const yearExpenses = await getExpenseStatistics(
-    yearExpensesRef,
-    expense,
-    operation
-  );
-  if (yearExpenses !== undefined) {
-    batch.set(yearExpensesRef, yearExpenses);
-  } else {
-    batch.delete(yearExpensesRef);
-  }
+  updateExpenseStatistics(yearRef.collection("expenses"), expense, batch);
 
   batch.set(
     monthRef,
@@ -90,16 +58,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-  const monthExpenses = await getExpenseStatistics(
-    monthExpensesRef,
-    expense,
-    operation
-  );
-  if (monthExpenses !== undefined) {
-    batch.set(monthExpensesRef, monthExpenses);
-  } else {
-    batch.delete(monthExpensesRef);
-  }
+  updateExpenseStatistics(monthRef.collection("expenses"), expense, batch);
 
   batch.set(
     dateRef,
@@ -111,17 +70,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-  const dateExpenses = await getExpenseStatistics(
-    dateExpensesRef,
-    expense,
-    operation
-  );
-  if(dateExpenses !== undefined)
-  {
-    batch.set(dateExpensesRef, dateExpenses);
-  }else{
-    batch.delete(dateExpensesRef)
-  }
+  updateExpenseStatistics(dateRef.collection("expenses"), expense, batch);
 
   //commit batch
   await batch.commit();

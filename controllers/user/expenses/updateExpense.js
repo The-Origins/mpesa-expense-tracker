@@ -8,7 +8,7 @@ module.exports = async (req, res, next) =>
         await expensesRef.doc(req.expense.id).update(req.body)
         await updateStatistics(req.expense, req.user, "delete")
         await updateStatistics(req.body, req.user)
-        res.status(201).json({success:true, data:req.body, message:"Successfully updated expense"})
+        res.json({success:true, data:req.body, message:"Successfully updated expense"})
     } catch (error) {
         next(error)
     }

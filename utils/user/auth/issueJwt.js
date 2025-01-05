@@ -8,7 +8,7 @@ module.exports = (id) => {
     iat: Date.now(),
   };
 
-  const signedToken = jwt.sign(payload, process.env.private_key, {
+  const signedToken = jwt.sign(payload, process.env.private_key.replace(/\\n/g, '\n'), {
     expiresIn,
     algorithm: "RS256",
   });

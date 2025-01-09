@@ -1,5 +1,10 @@
-module.exports = async function deleteSubCollections(ref, batch) {
-  const subcollections = await ref.listCollections();
+const db = require("../../../config/db")
+
+module.exports = async function deleteSubCollections(document) {
+  
+  const batch = db.batch()
+
+  const subcollections = await document.listCollections();
 
   for (const subcollection of subcollections) {
     const subDocs = await subcollection.listDocuments();
@@ -13,5 +18,7 @@ module.exports = async function deleteSubCollections(ref, batch) {
     }
   }
 
-  batch.delete(ref);
+  batch.delete(document);
+
+  await batch.commit()
 };

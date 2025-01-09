@@ -1,15 +1,15 @@
 const db = require("../../../config/db");
 
-const getQueryData = (query) => {
-  const queryData = query.docs.map((d) => {
-    const data = d.data();
-    return {
-      id: d.id,
-      total: data.total,
-      entries: data.entries,
-    };
-  });
-  return queryData;
+const getCollectionData = async (ref) => {
+  const data = {};
+  const documents = await ref.listDocuments();
+  for (document of documents) {
+    const documentData = (await document.get()).data();
+    if (documentData.total > 0 && documentData.entries > 0) {
+      data[document.id] = documentData;
+    }
+  }
+  return data;
 };
 
 module.exports = async (path, pathInfo) => {
@@ -25,8 +25,9 @@ module.exports = async (path, pathInfo) => {
   const collections = await ref.listCollections();
 
   for (let collection of collections) {
-    const collectionDocs = await ref.collection(collection.id).get();
-    statistics[collection.id] = getQueryData(collectionDocs);
+    statistics[collection.id] = await getCollectionData(
+      ref.collection(collection.id)
+    );
   }
 
   return statistics;

@@ -2,7 +2,7 @@ const { FieldValue } = require("firebase-admin/firestore");
 const db = require("../../../config/db");
 const updateExpenseStatistics = require("./updateExpenseStatistics");
 
-module.exports = async (expense, user, operation = "add") => {
+module.exports = async (expense, user, operation="add") => {
   const date = new Date(expense.date);
   const year = date.getFullYear().toString();
   const month = date.getMonth().toString();
@@ -34,7 +34,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(allRef.collection("expenses"), expense, batch);
+  updateExpenseStatistics(allRef.collection("expenses"), expense, batch, operation);
 
   batch.set(
     yearRef,
@@ -46,7 +46,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(yearRef.collection("expenses"), expense, batch);
+  updateExpenseStatistics(yearRef.collection("expenses"), expense, batch, operation);
 
   batch.set(
     monthRef,
@@ -58,7 +58,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(monthRef.collection("expenses"), expense, batch);
+  updateExpenseStatistics(monthRef.collection("expenses"), expense, batch, operation);
 
   batch.set(
     dateRef,
@@ -70,7 +70,7 @@ module.exports = async (expense, user, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(dateRef.collection("expenses"), expense, batch);
+  updateExpenseStatistics(dateRef.collection("expenses"), expense, batch, operation);
 
   //commit batch
   await batch.commit();

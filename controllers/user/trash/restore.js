@@ -14,7 +14,7 @@ module.exports = async (req, res, next) =>
 
         await db.collection("users").doc(req.user.id).collection("expenses").doc(expense.id).set(expenseData)
         await db.collection("users").doc(req.user.id).collection("trash").doc(req.params.id).delete()
-        await updateStatistics(expenseData, req.user)
+        await updateStatistics(expenseData, req.user, req.budget)
 
         res.status(201).json({success:true, data:expense.id, message:"Successfully restored expense"})
     } catch (error) {

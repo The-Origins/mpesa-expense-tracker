@@ -2,13 +2,24 @@ const { FieldValue } = require("firebase-admin/firestore");
 const db = require("../../../config/db");
 const updateExpenseStatistics = require("./updateExpenseStatistics");
 
-module.exports = async (expense, user, operation="add") => {
+module.exports = async (expense, user, budget, operation = "add") => {
+  const batch = db.batch();
   const date = new Date(expense.date);
+  const isInBudgetDuration =
+    date >= budget.duration.start && date < budget.duration.end;
+
+  if (isInBudgetDuration) {
+    batch.update(budget.ref, {
+      "amount.current": FieldValue.increment(
+        operation === "add" ? expense.amount : -expense.amount
+      ),
+    });
+  }
+
   const year = date.getFullYear().toString();
   const month = date.getMonth().toString();
   const day = date.getDate().toString();
 
-  const batch = db.batch();
   //ref for all the user statistics
   const allRef = db
     .collection("users")
@@ -34,7 +45,13 @@ module.exports = async (expense, user, operation="add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(allRef.collection("expenses"), expense, batch, operation);
+  updateExpenseStatistics(
+    allRef.collection("expenses"),
+    expense,
+    batch,
+    operation,
+    { isInBudgetDuration, ...budget }
+  );
 
   batch.set(
     yearRef,
@@ -46,7 +63,12 @@ module.exports = async (expense, user, operation="add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(yearRef.collection("expenses"), expense, batch, operation);
+  updateExpenseStatistics(
+    yearRef.collection("expenses"),
+    expense,
+    batch,
+    operation
+  );
 
   batch.set(
     monthRef,
@@ -58,7 +80,12 @@ module.exports = async (expense, user, operation="add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(monthRef.collection("expenses"), expense, batch, operation);
+  updateExpenseStatistics(
+    monthRef.collection("expenses"),
+    expense,
+    batch,
+    operation
+  );
 
   batch.set(
     dateRef,
@@ -70,7 +97,12 @@ module.exports = async (expense, user, operation="add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(dateRef.collection("expenses"), expense, batch, operation);
+  updateExpenseStatistics(
+    dateRef.collection("expenses"),
+    expense,
+    batch,
+    operation
+  );
 
   //commit batch
   await batch.commit();

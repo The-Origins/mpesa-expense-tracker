@@ -8,18 +8,21 @@ router.get(
   require("../../../../middleware/user/expenses/getExpense"),
   require("../../../../controllers/user/expenses/fetchExpense")
 );
-router.put(
+router.post(
   "/add",
+  require("../../../../middleware/user/budget/getBudget"),
   require("../../../../controllers/user/expenses/addExpense")
 );
 router.delete(
   "/delete/:id",
   require("../../../../middleware/user/expenses/getExpense"),
+  require("../../../../middleware/user/budget/getBudget"),
   require("../../../../controllers/user/expenses/deleteExpense")
 );
 router.put(
   "/update/:id",
   require("../../../../middleware/user/expenses/getExpense"),
+  require("../../../../middleware/user/budget/getBudget"),
   require("../../../../controllers/user/expenses/updateExpense")
 );
 

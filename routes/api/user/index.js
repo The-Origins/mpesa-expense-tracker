@@ -26,4 +26,14 @@ router.use(
   }),
   require("./trash")
 );
+
+router.use(
+  "/budget",
+  passport.authenticate("jwt", {
+    session: false,
+    failureRedirect: "/api/user/auth/failed",
+  }),
+  require("./budget")
+);
+
 module.exports = router;

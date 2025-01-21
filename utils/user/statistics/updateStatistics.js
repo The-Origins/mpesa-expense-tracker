@@ -5,15 +5,37 @@ const updateExpenseStatistics = require("./updateExpenseStatistics");
 module.exports = async (expense, user, budget, operation = "add") => {
   const batch = db.batch();
   const date = new Date(expense.date);
-  const isInBudgetDuration =
-    date >= budget.duration.start && date < budget.duration.end;
 
-  if (isInBudgetDuration) {
-    batch.update(budget.ref, {
-      "amount.current": FieldValue.increment(
-        operation === "add" ? expense.amount : -expense.amount
-      ),
-    });
+  //handle dictionary
+  const dictionaryRef = db
+    .collection("users")
+    .doc(user.id)
+    .collection("dictionary")
+    .doc(expense.recipient);
+  if (expense.labels[0] !== "unkown") {
+    if (operation === "add") {
+      batch.set(dictionaryRef, { labels: expense.labels });
+    } else {
+      batch.delete(dictionaryRef);
+    }
+  }
+
+  let isInBudgetDuration = false
+
+  //handle budget
+  if (budget) {
+    isInBudgetDuration =
+      date >= budget.duration.start && date < budget.duration.end;
+    
+    budget.isInBudgetDuration = isInBudgetDuration
+
+    if (isInBudgetDuration) {
+      batch.update(budget.ref, {
+        "amount.current": FieldValue.increment(
+          operation === "add" ? expense.amount : -expense.amount
+        ),
+      });
+    }
   }
 
   const year = date.getFullYear().toString();
@@ -50,7 +72,7 @@ module.exports = async (expense, user, budget, operation = "add") => {
     expense,
     batch,
     operation,
-    { isInBudgetDuration, ...budget }
+    budget
   );
 
   batch.set(

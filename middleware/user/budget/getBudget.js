@@ -10,26 +10,31 @@ module.exports = async (req, res, next) => {
       return next();
     }
 
-    const userBudgetRef = db
+    const budgetRef = db
       .collection("users")
       .doc(req.user.id)
       .collection("budget")
       .doc("info");
 
-    const budgetItems = (
-      await userBudgetRef.collection("items").listDocuments()
-    ).map((d) => d.id);
-    const userBudget = (await userBudgetRef.get()).data();
+    const budget = await budgetRef.get();
 
-    req.budget = {
-      data: userBudget,
-      items: budgetItems,
-      ref: userBudgetRef,
-      duration: {
-        start: new Date(userBudget.duration.start),
-        end: new Date(userBudget.duration.end),
-      },
-    };
+    if (budget.exists) {
+      const budgetItems = (
+        await budgetRef.collection("items").listDocuments()
+      ).map((d) => d.id);
+
+      const budgetData = budget.data();
+
+      req.budget = {
+        data: budgetData,
+        items: budgetItems,
+        ref: budgetRef,
+        duration: {
+          start: new Date(budgetData.duration.start),
+          end: new Date(budgetData.duration.end),
+        },
+      };
+    }
     next();
   } catch (error) {
     next(error);

@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
     await expensesRef.doc(req.expense.id).update(req.body);
     if (req.body.labels || req.body.amount) {
       await updateStatistics(req.expense, req.user, req.budget, "delete");
-      await updateStatistics(req.body, req.user, req.budget);
+      await updateStatistics({...req.expense, ...req.body}, req.user, req.budget);
     }
     res.json({
       success: true,

@@ -26,11 +26,5 @@ router.put(
   require("../../../../controllers/user/expenses/updateExpense")
 );
 
-router.delete("/reset",  async (req, res, next) => {
-    const batch = db.batch()
-    await deleteSubCollections(db.collection("users").doc(req.user.id), batch)
-    await batch.commit()
-    res.json({success:true, data:{}, message:"successful reset"})
-})
 
 module.exports = router

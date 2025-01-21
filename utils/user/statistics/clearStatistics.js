@@ -15,7 +15,7 @@ const handleDocument = async (ref, currentChecked, clearedPaths) => {
     const data = doc.data();
 
     // If total and entries are both zero, mark as cleared and delete subcollections
-    if (data && data.total === 0 && data.entries === 0) {
+    if (data && data.total <= 0 && data.entries <= 0) {
       await deleteSubCollections(ref); // Delete subcollections of this doc
       clearedPaths[docPath] = true; // Mark this path as cleared
       return { checked: true, cleared: true }; // Return early since it's been cleared

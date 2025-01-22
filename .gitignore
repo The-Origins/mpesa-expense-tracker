@@ -4,3 +4,4 @@ serviceAccountKey.json
 Dockerfile
 .dockerignore
 *.docker
+deploy.txt

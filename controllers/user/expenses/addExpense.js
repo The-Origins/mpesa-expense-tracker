@@ -23,7 +23,9 @@ module.exports = async (req, res, next) => {
       return res.json({
         success: !parsedReceipts.failed.length,
         data: parsedReceipts,
-        message: parsedReceipts.failed.length ? "Operation failed" : "Expense successfully added",
+        message: parsedReceipts.failed.length
+          ? "Operation failed"
+          : "Expense successfully added",
       });
     }
 

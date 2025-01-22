@@ -3,7 +3,7 @@ const db = require("../../../../config/db");
 module.exports = async (req, res, next) => {
   try {
     const itemId =
-      req.query.id || req.query.label || req.body.label || req.body.id;
+      req.query.id || req.query.label
     if (!itemId) {
       new Error(`No budget item id or label`);
     }
@@ -20,9 +20,8 @@ module.exports = async (req, res, next) => {
     if (!budgetItemInfo.exists) {
       new Error(`No item with id: ${itemId}`);
     }
-
-    req.budgetItemDocument = budgetItemDocument;
-    req.budgetItemInfo = budgetItemInfo;
+    
+    req.budgetItem = {ref:budgetItemDocument, data:{id:budgetItemInfo.id, ...budgetItemInfo.data()}}
 
     next();
   } catch (error) {

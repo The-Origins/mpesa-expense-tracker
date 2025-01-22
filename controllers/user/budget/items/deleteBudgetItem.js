@@ -1,6 +1,6 @@
 module.exports = async (req, res, next) => {
   try {
-    await req.budgetItemDocument.delete();
+    await req.budgetItem.ref.delete();
 
     res.json({
       success: true,

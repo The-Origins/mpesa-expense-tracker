@@ -1,8 +1,17 @@
 const { FieldValue } = require("firebase-admin/firestore");
 const db = require("../../../config/db");
 const updateExpenseStatistics = require("./updateExpenseStatistics");
+const invalidateStatisticsCacheKey = require("./invalidateStatisticsCacheKey");
+const generateCacheKey = require("../../redis/generateCacheKey");
+const removeFromCache = require("../../redis/removeFromCache");
 
-module.exports = async (expense, user, budget, operation = "add") => {
+module.exports = async (
+  expense,
+  user,
+  budget,
+  invalidatedKeys,
+  operation = "add"
+) => {
   const batch = db.batch();
   const date = new Date(expense.date);
 
@@ -12,29 +21,80 @@ module.exports = async (expense, user, budget, operation = "add") => {
     .doc(user.id)
     .collection("dictionary")
     .doc(expense.recipient);
-  if (expense.labels[0] !== "unkown") {
+
+  const keywordsRef = db
+    .collection("users")
+    .doc(user.id)
+    .collection("keywords");
+  if (!expense.isUnkown) {
     if (operation === "add") {
-      batch.set(dictionaryRef, { labels: expense.labels });
+      const values = { labels: expense.labels };
+      if (expense.keyword) {
+        values.keyword = expense.keyword;
+        batch.set(
+          keywordsRef
+            .doc(expense.keyword)
+            .collection("expenses")
+            .doc(expense.id),
+          { value: expense.id }
+        );
+      }
+      batch.set(dictionaryRef, values);
     } else {
+      if (expense.keyword) {
+        batch.delete(
+          keywordsRef
+            .doc(expense.keyword)
+            .collection("expenses")
+            .doc(expense.id)
+        );
+      }
       batch.delete(dictionaryRef);
     }
-  }
 
-  let isInBudgetDuration = false
+    //invalidate dictionary cache
+    const cacheKey = generateCacheKey({ user }, "dictionary") + "*";
+    removeFromCache(cacheKey);
+    invalidatedKeys[cacheKey] = true;
+  }
 
   //handle budget
   if (budget) {
-    isInBudgetDuration =
-      date >= budget.duration.start && date < budget.duration.end;
-    
-    budget.isInBudgetDuration = isInBudgetDuration
+    const isInBudgetDuration =
+      date.toISOString() >= budget.duration.start &&
+      date.toISOString() < budget.duration.end;
+
+    budget.isInBudgetDuration = isInBudgetDuration;
 
     if (isInBudgetDuration) {
-      batch.update(budget.ref, {
-        "amount.current": FieldValue.increment(
-          operation === "add" ? expense.amount : -expense.amount
-        ),
-      });
+      budget.ref = db
+        .collection("users")
+        .doc(user.id)
+        .collection("budget")
+        .doc("info");
+
+      batch.set(
+        budget.ref,
+        {
+          current: FieldValue.increment(
+            operation === "add" ? expense.amount : -expense.amount
+          ),
+        },
+        { merge: true }
+      );
+
+      if (operation === "add") {
+        batch.set(budget.ref.collection("expenses").doc(expense.id), {
+          value: expense.id,
+        });
+      } else {
+        batch.delete(budget.ref.collection("expenses").doc(expense.id));
+      }
+
+      //invalidate budget cache
+      const cacheKey = `budget:${user.id}:*`;
+      removeFromCache(cacheKey);
+      invalidatedKeys[cacheKey] = true;
     }
   }
 
@@ -67,13 +127,18 @@ module.exports = async (expense, user, budget, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(
+  await updateExpenseStatistics(
     allRef.collection("expenses"),
+    user,
     expense,
     batch,
+    invalidatedKeys,
     operation,
     budget
   );
+
+  //invalidate cache
+  invalidateStatisticsCacheKey(user, "", invalidatedKeys);
 
   batch.set(
     yearRef,
@@ -85,12 +150,16 @@ module.exports = async (expense, user, budget, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(
+  await updateExpenseStatistics(
     yearRef.collection("expenses"),
+    user,
     expense,
     batch,
+    invalidatedKeys,
     operation
   );
+
+  invalidateStatisticsCacheKey(user, `years/${year}`, invalidatedKeys);
 
   batch.set(
     monthRef,
@@ -102,11 +171,19 @@ module.exports = async (expense, user, budget, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(
+  await updateExpenseStatistics(
     monthRef.collection("expenses"),
+    user,
     expense,
     batch,
+    invalidatedKeys,
     operation
+  );
+
+  invalidateStatisticsCacheKey(
+    user,
+    `years/${year}/months/${month}`,
+    invalidatedKeys
   );
 
   batch.set(
@@ -119,11 +196,19 @@ module.exports = async (expense, user, budget, operation = "add") => {
     },
     { merge: true }
   );
-  updateExpenseStatistics(
+  await updateExpenseStatistics(
     dateRef.collection("expenses"),
+    user,
     expense,
     batch,
+    invalidatedKeys,
     operation
+  );
+
+  invalidateStatisticsCacheKey(
+    user,
+    `years/${year}/months/${month}/days/${day}`,
+    invalidatedKeys
   );
 
   //commit batch

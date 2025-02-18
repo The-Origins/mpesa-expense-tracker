@@ -1,13 +1,28 @@
-const db = require("../../../config/db");
+const addTocache = require("../../../utils/redis/addToCache");
+const fetchExpenseDocs = require("../../../utils/user/expenses/fetchExpenseDocs");
 
 module.exports = async (req, res, next) => {
   try {
-    const expensesRef = db
-      .collection("users")
-      .doc(req.user.id)
-      .collection("expenses");
-    let expenses = await expensesRef.get();
-    expenses = expenses.docs.map((d) => ({ id: d.id, ...d.data() }));
+    let expenses = [];
+    if (req.cachedData) {
+      //retrive from cache
+      expenses = req.cachedData;
+    } else {
+      const expenseDocs = await fetchExpenseDocs(
+        req.user,
+        [],
+        req.query?.limit
+      );
+
+      for (doc of expenseDocs) {
+        if (doc.id !== "unique_refs") {
+          expenses.push({ id: doc.id, ...doc.data() });
+        }
+      }
+
+      //add to cache
+      addTocache(req.cacheKey, expenses);
+    }
 
     res.json({
       success: true,

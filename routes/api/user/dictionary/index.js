@@ -1,5 +1,9 @@
-const router = require("express").Router()
+const router = require("express").Router();
 
-router.get("/", require("../../../../controllers/user/dictionary/fetchDictionary"))
+router.get(
+  "/",
+  require("../../../../middleware/redis/getCachedData"),
+  require("../../../../controllers/user/dictionary/fetchDictionary")
+);
 
-module.exports = router
+module.exports = router;

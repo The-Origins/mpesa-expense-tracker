@@ -1,10 +1,12 @@
 const db = require("../../../config/db");
+const client = require("../../../config/redis");
+const setDefaultLabels = require("./setDefaultLabels");
 
-module.exports = async (receipts, user) => {
+module.exports = async (receipts, failed, user) => {
   const expenses = [];
-  const failed = [];
 
-  for (let receipt of receipts) {
+  for (let i = 0; i < receipts.length; i++) {
+    const receipt = receipts[i];
     const info = retriveInfo(receipt);
 
     if (
@@ -16,33 +18,80 @@ module.exports = async (receipts, user) => {
       info.ref === null ||
       !info.ref.length
     ) {
-      failed.push(info);
+      let errors = {};
+      if (info.amount === null || isNaN(info.amount)) {
+        errors["amount"] = "Unable to retrieve amount";
+      }
+      if (info.date === null) {
+        errors["date"] = "Unable to retrieve date";
+      }
+      if (info.recipient === null || !info.recipient.length) {
+        errors["recipient"] = "Unable to retrieve recipient";
+      }
+      if (info.ref === null || !info.ref.length) {
+        errors[ref] = "Unable to retrieve reference ID";
+      }
+      failed[i] = { ...info, receipt, errors };
+      failed.length += 1;
       continue;
     }
 
-    const labels = await fetchLabels(info.recipient, user);
-    expenses.push({ ...info, labels });
+    await fetchLabels(info, user);
+    expenses.push({ ...info, receipt });
   }
 
-  return { expenses, failed };
+  return expenses;
 };
 
-fetchLabels = async (recipient, user) => {
+fetchLabels = async (expense, user) => {
   const dictionaryRef = db
     .collection("users")
     .doc(user.id)
     .collection("dictionary")
-    .doc(recipient);
+    .doc(expense.recipient);
 
-  const dictionaryData = await dictionaryRef.get();
+  const keywordsRef = db
+    .collection("users")
+    .doc(user.id)
+    .collection("keywords");
+
+  const dictionaryInfo = await dictionaryRef.get();
 
   //check if recipient exists in dictionary
-  if (dictionaryData.exists) {
-    return dictionaryData.data().labels;
-  }
+  if (dictionaryInfo.exists) {
+    const data = dictionaryInfo.data();
+    expense.labels = data.labels;
+    if (data.keyword) {
+      expense.keyword = data.keyword;
+    }
+  } else {
+    const cachedKeywords = await client.get(`keywords:${user.id}:`);
 
-  //return unkown
-  return ["unkown"];
+    if (cachedKeywords) {
+      for (let item of JSON.parse(cachedKeywords)) {
+        if (expense.recipient.includes(item.keyword)) {
+          expense.labels = item.labels;
+          expense.keyword = item.keyword;
+          break;
+        }
+      }
+    } else {
+      const keywords = (await keywordsRef.listDocuments()).map((doc) => doc.id);
+
+      for (let keyword of keywords) {
+        if (expense.recipient.includes(keyword)) {
+          const data = (await keywordsRef.doc(keyword).get()).data();
+          expense.labels = data.labels;
+          expense.keyword = keyword;
+          break;
+        }
+      }
+    }
+
+    if (!expense.labels) {
+      setDefaultLabels(expense);
+    }
+  }
 };
 
 const retriveInfo = (receipt) => {
@@ -76,12 +125,14 @@ const retriveInfo = (receipt) => {
 
   const withdrawalMatch = receipt.match(withdrawalRegex);
 
+  const recipientMatch = receipt.match(recipientRegex);
+
   let recipient = withdrawalMatch
-    ? withdrawalMatch[1].trim()
+    ? withdrawalMatch[1].trim().toLowerCase()
     : receipt.match(airtimeRegex)
     ? "safaricom"
-    : receipt.match(recipientRegex)
-    ? receipt.match(recipientRegex)[0].replace(/^to\s+/i, "")
+    : recipientMatch
+    ? recipientMatch[0].replace(/^to\s+/i, "").toLowerCase()
     : null;
 
   let date = receipt.match(dateRegex)
@@ -97,7 +148,9 @@ const retriveInfo = (receipt) => {
 
     hour =
       ampm.toLowerCase() === "pm"
-        ? String(Number(hour) + 12)
+        ? hour === "12"
+          ? "12"
+          : String(Number(hour) + 12)
         : hour === "12"
         ? `00`
         : ("0" + hour).slice(-2);
@@ -106,7 +159,9 @@ const retriveInfo = (receipt) => {
 
   if (date) {
     const [day, month, year] = date.split("/");
-    date = `20${year}-${("0" + month).slice(-2)}-${day}`;
+    date = `${("20" + year).slice(-4)}-${("0" + month).slice(-2)}-${(
+      "0" + day
+    ).slice(-2)}`;
   }
 
   let dateTime = null;

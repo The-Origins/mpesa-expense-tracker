@@ -1,28 +1,25 @@
-const db = require("../../../config/db");
-const updateStatistics = require("../../../utils/user/statistics/updateStatistics");
+const deleteExpenses = require("../../../utils/user/expenses/deleteExpenses");
 
 module.exports = async (req, res, next) => {
   try {
-    const expenseRef = db
-      .collection("users")
-      .doc(req.user.id)
-      .collection("expenses")
-      .doc(req.expense.id);
-    const trashRef = db
-      .collection("users")
-      .doc(req.user.id)
-      .collection("trash")
-      .doc(req.expense.id);
-    await expenseRef.delete();
-    await trashRef.set(req.expense);
-    await updateStatistics(req.expense, req.user, req.budget, "delete");
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: {},
-        message: "Successfully added expense to trash",
-      });
+    const ids = req.body.id ? [req.body.id] : req.body.ids || [];
+
+    if (!ids.length) {
+      res.code = 400;
+      throw new Error(`Invalid input`);
+    }
+
+    const operations = await deleteExpenses(ids, req.user, req.budget);
+
+    res.status(200).json({
+      success: !operations.failed.length,
+      data: operations,
+      message: `${operations.successful.length} successful operation${
+        operations.successful.length === 1 ? "" : "s"
+      }, ${operations.failed.length} failed operation${
+        operations.successful.length === 1 ? "" : "s"
+      }`,
+    });
   } catch (error) {
     next(error);
   }

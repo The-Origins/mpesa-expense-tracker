@@ -1,30 +1,58 @@
 const { FieldValue } = require("firebase-admin/firestore");
+const invalidateStatisticsCacheKey = require("./invalidateStatisticsCacheKey");
 
-module.exports = (ref, expense, batch, operation = "add", budget) => {
+module.exports = async (
+  ref,
+  user,
+  expense,
+  batch,
+  invalidatedKeys,
+  operation = "add",
+  budget
+) => {
   // ref = users/{userId}/statistics/{all}/expenses
-  let docId = "";
+  let path = ref.path.split("/").slice(3).join("/");
+
+  let budgetItemRef = null;
+  let isbudgetItemPathInvalid = false;
+
+  if (budget && budget.isInBudgetDuration) {
+    budgetItemRef = budget.ref.collection("items");
+  }
 
   for (let i = 0; i < expense.labels.length; i++) {
     const label = expense.labels[i];
 
-    if (budget) {
-      if (budget.isInBudgetDuration) {
-        if (i === 0) {
-          docId = label;
-        } else {
-          docId += `,${label}`;
-        }
-
-        if (budget.items.includes(docId)) {
-          batch.update(budget.ref.collection("items").doc(docId), {
-            current: FieldValue.increment(
-              operation === "add" ? expense.amount : -expense.amount
-            ),
+    if (budgetItemRef && !isbudgetItemPathInvalid) {
+      budgetItemRef = budgetItemRef.doc(label);
+      if (operation === "add") {
+        try {
+          await budgetItemRef.update({
+            current: FieldValue.increment(expense.amount),
           });
+          batch.set(budgetItemRef.collection("expenses").doc(expense.id), {
+            value: expense.id,
+          });
+        } catch (err) {
+          if (err.code === 5) {
+            isbudgetItemPathInvalid = true;
+          } else {
+            throw err;
+          }
         }
+      } else {
+        batch.delete(budgetItemRef);
+        batch.delete(budgetItemRef.collection("expenses").doc(expense.id));
       }
+      budgetItemRef = budgetItemRef.collection("items");
     }
+
     ref = ref.doc(label);
+    path += `/${label}`;
+
+    //invalidate cache
+    invalidateStatisticsCacheKey(user, path, invalidatedKeys);
+
     batch.set(
       ref,
       {
@@ -37,5 +65,6 @@ module.exports = (ref, expense, batch, operation = "add", budget) => {
     );
 
     ref = ref.collection("expenses");
+    path += `/expenses`;
   }
 };

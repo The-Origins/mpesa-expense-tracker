@@ -1,10 +1,9 @@
 const db = require("../../../config/db");
-const clearStatistics = require("../../../utils/user/statistics/clearStatistics");
+const removeFromCache = require("../../../utils/redis/removeFromCache");
 
 module.exports = async (req, res, next) => {
   try {
-    let checkedPaths = {};
-    let clearedPaths = {};
+    removeFromCache(`trash:${req.user.id}:*`);
 
     const trashRef = db
       .collection("users")
@@ -16,15 +15,23 @@ module.exports = async (req, res, next) => {
 
     if (!documents.length) {
       res.code = 404;
-      next(new Error(`No items in trash to clear`));
+      throw new Error(`No items in trash to clear`);
     }
 
+    let writes = 0;
     for (document of documents) {
+      if (writes >= 499) {
+        await batch.commit();
+        writes = 0;
+        batch = db.batch();
+      }
+
       batch.delete(document);
-      await clearStatistics(document, req.user, checkedPaths, clearedPaths);
+      writes++;
     }
 
     await batch.commit();
+
     res.json({
       success: true,
       data: {},

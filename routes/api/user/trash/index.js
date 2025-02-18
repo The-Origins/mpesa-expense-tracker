@@ -1,7 +1,16 @@
-const db =  require("../../../../config/db")
-const router = require("express").Router()
+const db = require("../../../../config/db");
+const router = require("express").Router();
 
-router.delete("/", require("../../../../controllers/user/trash/clear"))
-router.post("/restore/:id", require("../../../../middleware/user/budget/getBudget"), require("../../../../controllers/user/trash/restore") )
+router.get(
+  "/",
+  require("../../../../middleware/redis/getCachedData"),
+  require("../../../../controllers/user/trash/fetchTrash")
+);
+router.delete("/clear", require("../../../../controllers/user/trash/clear"));
+router.post(
+  "/restore",
+  require("../../../../middleware/user/budget/getBudget"),
+  require("../../../../controllers/user/trash/restore")
+);
 
-module.exports = router
+module.exports = router;

@@ -1,23 +1,31 @@
-const db = require("../../../config/db")
-const updateStatistics = require("../../../utils/user/statistics/updateStatistics")
+const addFailedExpenses = require("../../../utils/user/expenses/failed/addFailedExpenses");
+const restoreExpenses = require("../../../utils/user/trash/restoreExpenses");
 
-module.exports = async (req, res, next) =>
-{
-    try {
-        const expense = await db.collection("users").doc(req.user.id).collection("trash").doc(req.params.id).get()
-        const expenseData = expense.data()
-        
-        if(!expense.exists)
-        {
-            return next(new Error(`No expense with id: ${req.params.id} in trash`))
-        }
+module.exports = async (req, res, next) => {
+  try {
+    const ids = req.body.id ? [req.body.id] : req.body.ids || [];
 
-        await db.collection("users").doc(req.user.id).collection("expenses").doc(expense.id).set(expenseData)
-        await db.collection("users").doc(req.user.id).collection("trash").doc(req.params.id).delete()
-        await updateStatistics(expenseData, req.user, req.budget)
-
-        res.status(201).json({success:true, data:expense.id, message:"Successfully restored expense"})
-    } catch (error) {
-        next(error)
+    if (!ids.length) {
+      res.code = 400;
+      throw new error(`Invalid input`);
     }
-}
+
+    const operations = await restoreExpenses(ids, req.user, req.budget);
+
+    if (operations.failed.length) {
+      await addFailedExpenses(operations.failed, req.user);
+    }
+
+    res.json({
+      success: !operations.failed.length,
+      data,
+      message: `${operations.successful.length} Successfull operation${
+        operations.successful.length === 1 ? "" : "s"
+      }, ${operations.failed.length} failed operation${
+        operations.failed.length === 1 ? "" : "s"
+      }`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -2,6 +2,8 @@ require("dotenv").config();
 require("./config/db");
 const express = require("express");
 const passport = require("passport");
+const client = require("./config/redis");
+
 const cors = require("cors");
 
 const app = express();
@@ -26,5 +28,6 @@ app.use(require("./routes"));
 
 //start server
 app.listen(process.env.PORT, () => {
+  client.connect();
   console.log(`Server is running on port: ${process.env.PORT}`);
 });

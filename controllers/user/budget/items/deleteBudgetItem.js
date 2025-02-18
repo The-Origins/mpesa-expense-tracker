@@ -1,6 +1,13 @@
+const db = require("../../../../config/db");
+const deleteSubCollections = require("../../../../utils/app/deleteSubCollections");
+const removeFromCache = require("../../../../utils/redis/removeFromCache");
+
 module.exports = async (req, res, next) => {
   try {
-    await req.budgetItem.ref.delete();
+    const batch = db.batch();
+    await deleteSubCollections(req.itemRef, batch);
+    await batch.commit();
+    removeFromCache(`budget:${req.user.id}:items*`);
 
     res.json({
       success: true,

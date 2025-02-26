@@ -2,7 +2,7 @@ const removeFromCache = require("../../../../utils/redis/removeFromCache");
 module.exports = async (req, res, next) => {
   try {
     await req.itemRef.update(req.body);
-    removeFromCache(`budget:${req.user.id}:items:*`);
+    removeFromCache(`${req.user.id}:budget:items*`);
 
     res.json({
       success: true,

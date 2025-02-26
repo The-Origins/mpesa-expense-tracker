@@ -40,8 +40,8 @@ module.exports = async (req, res, next) => {
     }
 
     if (updateAllExpenses) {
-      const expensesCacheKey = `expenses:${req.user.id}:`;
-      const keywordExpensesCachedKey = expensesCacheKey + `keyword:${keyword}:`;
+      const expensesCacheKey = `${req.user.id}:expenses`;
+      const keywordExpensesCachedKey = `${req.user.id}:keywords:${keyword}:expenses`;
       const cachedKeywordExpenses = await client.get(keywordExpensesCachedKey);
       if (cachedKeywordExpenses) {
         for (let keywordExpense of JSON.parse(cachedKeywordExpenses)) {
@@ -61,7 +61,6 @@ module.exports = async (req, res, next) => {
           );
         }
       } else {
-        
         cachedExpenses = await client.get(expensesCacheKey);
         if (cachedExpenses) {
           for (let expense of JSON.parse(cachedExpenses)) {
@@ -156,7 +155,7 @@ module.exports = async (req, res, next) => {
     await batch.commit();
 
     //clear cache
-    removeFromCache(`keywords:${req.user.id}:`);
+    removeFromCache(`${req.user.id}:keywords`);
 
     res.json({
       success: true,

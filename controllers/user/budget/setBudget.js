@@ -6,7 +6,8 @@ const fetchExpenseDocs = require("../../../utils/user/expenses/fetchExpenseDocs"
 
 module.exports = async (req, res, next) => {
   try {
-    removeFromCache(`budget:${req.user.id}:*`);
+    const budgetCacheKey = `${req.user.id}:budget`
+    removeFromCache(budgetCacheKey + "*");
 
     const batch = db.batch();
     const { items, ...rest } = req.body;
@@ -63,9 +64,9 @@ module.exports = async (req, res, next) => {
       setItems(items, budgetRef.collection("items"), batch);
     }
 
-    addToCache(`budget:${req.user.id}:`, budget);
+    addToCache(budgetCacheKey, budget);
 
-    addToCache(`budget:${req.user.id}:items:`, items);
+    addToCache(budgetCacheKey + ":items", items);
     await batch.commit();
 
     res.json({

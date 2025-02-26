@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
     const batch = db.batch();
     await deleteSubCollections(req.itemRef, batch);
     await batch.commit();
-    removeFromCache(`budget:${req.user.id}:items*`);
+    removeFromCache(`${req.user.id}:budget:items*`);
 
     res.json({
       success: true,

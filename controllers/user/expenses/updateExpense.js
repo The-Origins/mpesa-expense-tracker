@@ -8,9 +8,7 @@ module.exports = async (req, res, next) => {
   try {
     const newValues = req.body;
     const batch = db.batch();
-    //invalidate cache
-    removeFromCache(`expenses:${req.user.id}:*`);
-    removeFromCache(`keywords:${req.user.id}:expenses:*`);
+    
 
     const invalidatedKeys = {};
 
@@ -35,12 +33,13 @@ module.exports = async (req, res, next) => {
     }
 
     if (newValues.labels || newValues.amount) {
-      newValues = { ...req.expense, ...newValues };
-
+      
       if (newValues.labels) {
-        newValues.isUnkown = false;
-        newValues.keyword = false;
+        newValues.isUnkown = false; 
+        newValues.keyword = false
       }
+
+      newValues = { ...req.expense, ...newValues };
 
       await updateStatistics(
         req.expense,
@@ -52,6 +51,9 @@ module.exports = async (req, res, next) => {
 
       await updateStatistics(newValues, req.user, req.budget, invalidatedKeys);
     }
+
+    //invalidate cache
+    removeFromCache(`${req.user.id}:expenses*`);
 
     await batch.commit();
     res.json({

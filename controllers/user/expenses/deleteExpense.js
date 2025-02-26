@@ -1,3 +1,6 @@
+const { FieldPath } = require("firebase-admin/firestore");
+const db = require("../../../config/db");
+const removeFromCache = require("../../../utils/redis/removeFromCache");
 const deleteExpenses = require("../../../utils/user/expenses/deleteExpenses");
 
 module.exports = async (req, res, next) => {
@@ -9,7 +12,36 @@ module.exports = async (req, res, next) => {
       throw new Error(`Invalid input`);
     }
 
-    const operations = await deleteExpenses(ids, req.user, req.budget);
+    const operation = async (doc, batch, writes, invalidatedKeys) => {
+      const data = doc.data();
+      removeFromUniqueRefs(data.ref, req.user, batch);
+      writes++;
+
+      batch.set(
+        db.collection("users").doc(req.user.id).collection(`trash`).doc(doc.id),
+        data
+      );
+      writes++;
+
+      await updateStatistics(
+        { ...data, id: doc.id },
+        user,
+        req.budget,
+        invalidatedKeys,
+        "delete"
+      );
+    };
+    const operations = await deleteExpenses(
+      ids,
+      db
+        .collection("users")
+        .doc(req.user.id)
+        .collection("expenses"),
+      operation
+    );
+
+    removeFromCache(`${req.user.id}:expenses*`);
+    removeFromCache(`${req.user.id}:trash*`);
 
     res.status(200).json({
       success: !operations.failed.length,

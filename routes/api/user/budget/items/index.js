@@ -1,6 +1,10 @@
 const router = require("express").Router();
 
-router.get("/", require("../../../../../controllers/user/budget/items/fetchBudgetItems"))
+router.get(
+  "/",
+  require("../../../../../middleware/redis/getCachedData"),
+  require("../../../../../controllers/user/budget/items/fetchBudgetItems")
+);
 router.post(
   "/add/*",
   require("../../../../../middleware/user/budget/items/getItemRef"),

@@ -3,8 +3,9 @@ const generateCacheKey = require("../../utils/redis/generateCacheKey");
 
 module.exports = async (req, res, next) => {
   try {
-    const prefix = req.baseUrl.split("/")[3];
-    const cacheKey = generateCacheKey(req, prefix);
+    const key = req.baseUrl.split("/").slice(3).join(":");
+    const cacheKey = generateCacheKey(req, key);
+    
     const data = await client.get(cacheKey);
 
     if (data) {

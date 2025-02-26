@@ -1,17 +1,12 @@
 module.exports = (expense) => {
   const recipient = expense.recipient;
-  const accountMatch = recipient.match(/for account/i);
-  const accountMatchIndex = !accountMatch || accountMatch.index + 11;
+  let accountIndex = recipient.indexOf("for account");
 
-  expense.labels = accountMatch
-    ? [
-        recipient
-          .substring(
-            accountMatchIndex,
-            recipient.indexOf(" ", accountMatchIndex)
-          )
-          .toLowerCase(),
-      ]
-    : [recipient.split(" ")[0].toLowerCase()];
+  if (accountIndex !== -1) {
+    accountIndex += 12;
+    expense.labels = [recipient.substring(accountIndex)];
+  } else {
+    expense.labels = recipient.trim().split(" ").slice(0, 1);
+  }
   expense.isUnknown = true;
 };

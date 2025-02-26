@@ -6,27 +6,22 @@ module.exports = async (req, res, next) => {
     let trash = [];
     if (req.cachedData) {
       //retrive from cache
-      trash = req.cachedData.trash;
+      trash = req.cachedData;
     } else {
-      const { limit } = req.query;
-
       const trashRef = db
         .collection("users")
         .doc(req.user.id)
         .collection("trash");
 
-      let trashDocs = (await trashRef.get()).docs;
-
-      for (let i = 0; i < trashDocs.length; i++) {
-        if (limit && i >= Number(limit)) {
-          break;
-        }
-
-        trash.push({ id: trashDocs[i].id, ...trashDocs[i].data() });
+      if (req.query?.limit) {
+        trashRef = trashRef.limit(Number(req.query.limit));
       }
 
+      trash = (await trashRef.get()).docs.map((doc) => ({id:doc.id, ...doc.data()}));
+
+
       //add to cache
-      addTocache(req.cacheKey, { trash });
+      addTocache(req.cacheKey, trash);
     }
 
     res.json({

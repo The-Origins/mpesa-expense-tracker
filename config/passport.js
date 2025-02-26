@@ -16,7 +16,7 @@ const strategy = new JWTstrategy(options, (payload, done) => {
     return done(new Error(`Token Expired`), null);
   }
 
-  const cacheKey = `users:${payload.sub}:`;
+  const cacheKey = `${payload.sub}`;
   client
     .get(cacheKey)
     .then((cachedUserData) => {

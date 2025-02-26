@@ -8,6 +8,8 @@ module.exports = async (req, res, next) => {
       throw new Error(`No user budget`);
     }
 
+    const budgetCacheKey = `${req.user.id}:budget`
+
     const {
       items,
       duration,
@@ -77,11 +79,11 @@ module.exports = async (req, res, next) => {
       rest["duration.start"] = durationStart;
       rest["duration.end"] = durationEnd;
       //invalidate *all* budget cache
-      removeFromCache(`budget:${req.user.id}:*`);
+      removeFromCache(budgetCacheKey + "*");
     }
 
     //invalidate budget cache
-    removeFromCache(`budget:${req.user.id}:`);
+    removeFromCache(budgetCacheKey);
 
     const budgetRef = db
       .collection("users")

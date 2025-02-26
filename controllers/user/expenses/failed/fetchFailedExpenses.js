@@ -6,7 +6,7 @@ module.exports = async (req, res, next) => {
     let failed = [];
     if (req.cachedData) {
       //retrive from cache
-      failed = req.cachedData.failed;
+      failed = req.cachedData;
     } else {
       const { limit } = req.query;
 
@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
       }
 
       //add to cache
-      addTocache(req.cacheKey, { failed });
+      addTocache(req.cacheKey, failed);
     }
 
     res.json({

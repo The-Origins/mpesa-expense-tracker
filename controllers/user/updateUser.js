@@ -6,7 +6,7 @@ const removeCredentials = require("../../utils/auth/removeCredentials");
 module.exports = async (req, res, next) => {
   try {
     //invalidate user cache
-    removeFromCache(`users:${req.user.id}`);
+    removeFromCache(`${req.user.id}`);
 
     const batch = db.batch();
 

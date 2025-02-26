@@ -1,14 +1,12 @@
 const db = require("../../../../config/db");
-const client = require("../../../../config/redis");
 const addToCache = require("../../../../utils/redis/addToCache");
 const fetchItems = require("../../../../utils/user/budget/items/fetchItems");
 
 module.exports = async (req, res, next) => {
   try {
     let items = {};
-    const cachedBudgetItems = await client.get(`budget:${req.user.id}:items:`);
-    if (cachedBudgetItems) {
-      items = JSON.parse(cachedBudgetItems);
+    if (req.cachedData) {
+      items = req.cachedData;
     } else {
       await fetchItems(
         db
@@ -24,7 +22,7 @@ module.exports = async (req, res, next) => {
         res.code = 404;
         throw new Error(`No budget items`);
       }
-      addToCache(`budget:${req.user.id}:items:`, items);
+      addToCache(req.cacheKey, items);
     }
 
     res.json({

@@ -2,7 +2,6 @@ const { FieldValue } = require("firebase-admin/firestore");
 const db = require("../../../config/db");
 const updateExpenseStatistics = require("./updateExpenseStatistics");
 const invalidateStatisticsCacheKey = require("./invalidateStatisticsCacheKey");
-const generateCacheKey = require("../../redis/generateCacheKey");
 const removeFromCache = require("../../redis/removeFromCache");
 
 module.exports = async (
@@ -15,45 +14,43 @@ module.exports = async (
   const batch = db.batch();
   const date = new Date(expense.date);
 
-  //handle dictionary
-  const dictionaryRef = db
-    .collection("users")
-    .doc(user.id)
-    .collection("dictionary")
-    .doc(expense.recipient);
+  //handle keyword
+  if (expense.keyword) {
+    const keywordExpensesRef = db
+      .collection("users")
+      .doc(user.id)
+      .collection("keywords")
+      .doc(expense.keyword)
+      .collection("expenses");
 
-  const keywordsRef = db
-    .collection("users")
-    .doc(user.id)
-    .collection("keywords");
-  if (!expense.isUnkown) {
-    if (operation === "add") {
-      const values = { labels: expense.labels };
-      if (expense.keyword) {
-        values.keyword = expense.keyword;
-        batch.set(
-          keywordsRef
-            .doc(expense.keyword)
-            .collection("expenses")
-            .doc(expense.id),
-          { value: expense.id }
-        );
-      }
-      batch.set(dictionaryRef, values);
+    if (operation == "add") {
+      batch.set(keywordExpensesRef.doc(expense.id), { value: expense.id });
     } else {
-      if (expense.keyword) {
-        batch.delete(
-          keywordsRef
-            .doc(expense.keyword)
-            .collection("expenses")
-            .doc(expense.id)
-        );
-      }
-      batch.delete(dictionaryRef);
+      batch.delete(keywordExpensesRef.doc(expense.id));
     }
 
+    //invalidate keyword cache
+    const cacheKey = `${user.id}:keywords:${expense.keyword}:expenses`
+    removeFromCache(cacheKey);
+    invalidatedKeys[cacheKey] = true;
+  }
+
+  //handle dictionary
+  if ( operation == "add" && !expense.isUnkown) {
+    const dictionaryEntryRef = db
+      .collection("users")
+      .doc(user.id)
+      .collection("dictionary")
+      .doc(expense.recipient);
+
+    let values = { labels: expense.labels };
+    if (expense.keyword) {
+      values.keyword = expense.keyword;
+    }
+    batch.set(dictionaryEntryRef, values);
+
     //invalidate dictionary cache
-    const cacheKey = generateCacheKey({ user }, "dictionary") + "*";
+    const cacheKey = `${user.id}:dictionary`
     removeFromCache(cacheKey);
     invalidatedKeys[cacheKey] = true;
   }
@@ -92,7 +89,7 @@ module.exports = async (
       }
 
       //invalidate budget cache
-      const cacheKey = `budget:${user.id}:*`;
+      const cacheKey = `${user.id}:budget*`;
       removeFromCache(cacheKey);
       invalidatedKeys[cacheKey] = true;
     }

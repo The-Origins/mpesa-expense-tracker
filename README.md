@@ -4,12 +4,12 @@
 
 ## Authorization
 
-The app uses jwt for user authentification, so once you register or login a user you will recieve a jwt. Attach the jwt to your request authorization headers as a bearer token.
+The app uses JSON Web Tokens for user authentification, An `access` token and http-only secure `refresh` token `cookie` are provided. Save the `access` token in memory and set your `credentials: 'include'` in the request options.
 
 1. **Register a user**:
 
    - **method:** `POST`
-   - **path:** `/api/user/register`
+   - **path:** `/api/auth/register`
    - **body:**
 
      - `name`: `Object` - An object containing the users first and last name.
@@ -43,7 +43,7 @@ The app uses jwt for user authentification, so once you register or login a user
      - `data`: `Object` - An object containing the user object and a jwt token.
 
        - `user`:`Object` - An object containing all the users info.
-       - `jwt`:`Object` - An object containing a `token` and it's `expires in` value.
+       - `access`:`Object` - An object containing the access `access token` and it's `expires in` value.
 
        ```javascript
            {
@@ -59,7 +59,7 @@ The app uses jwt for user authentification, so once you register or login a user
 2. **Login a user**:
 
    - **method:** `POST`
-   - **path**: `/api/user/login`
+   - **path**: `/api/auth/login`
    - **body:**
 
      - `email`: `String` - A valid email string containing the users email.
@@ -79,7 +79,7 @@ The app uses jwt for user authentification, so once you register or login a user
      - `data`: `Object` - An object containing the user object and a jwt token.
 
        - `user`:`Object` - An object containing all the users info.
-       - `jwt`:`Object` - An object containing a `token` and it's `expires in` value.
+       - `access`:`Object` - An object containing the `access token` and it's `expires in` value.
 
        ```javascript
            {
@@ -92,13 +92,77 @@ The app uses jwt for user authentification, so once you register or login a user
            }
        ```
 
-## expenses
+3. **Re-issue Tokens**:
+
+   - **method:** `POST`
+   - **path**: `/api/auth/re-issue-tokens`
+   - **body:** `empty`
+   - **credentials:** `true` - To include the http-only secure refresh token.
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing the user object and a jwt token.
+
+       - `access`:`Object` - An object containing the `access token` and it's `expires in` value.
+
+       ```javascript
+           {
+               success:Boolean,
+               data:{
+                   access:Object
+               },
+               message:String
+           }
+       ```
+
+## User
+
+1. **Update user**:
+
+   - **method:** `PUT`
+   - **path**: `/api/user/update`
+   - **body:** `Object` - An object containing whatever `part` of the user you want to update. You can also update `nested values` by referencing them directly(e.g `phone.number`:`String`).
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing the `part` of the user that was updated.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```
+
+2. **Delete user**:
+
+   - **method:** `DELETE`
+   - **path:** `/api/user/delete`
+   - **body:** `empty`
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - Empty object
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```
+
+## Expenses
 
 1. **Add an expense**:
 
    - **method:** `PUT`
    - **path**: `/api/user/expenses/add`
-   - **body:** An `expense object` _or_ a `receipt string` containing a forwarded `mpesa message` _or_ an `array` containing **multiple** of either with the property names `expenses` _or_ `receipts`.
+   - **body:** An `expense object` _or_ a `receipt string` containing a forwarded `mpesa message` _or_ an `array` containing **multiple** of **either** with the property names `expenses` _or_ `receipts`.
    - **definitions**:
 
      - `expense`: `Object` - A `complete` expense object containing info about the expense:
@@ -118,7 +182,7 @@ The app uses jwt for user authentification, so once you register or login a user
 
        ```javascript
        {
-        expense | expenses | receipt | receipts
+        // expense | expenses | receipt | receipts
 
         //Definitions
         expense:{
@@ -142,14 +206,14 @@ The app uses jwt for user authentification, so once you register or login a user
 
      - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
      - `message`:`String` - A string with the necessary message.
-     - `data`: `Object` - An object containing the `expenses` added and any `failed` expenses.
+     - `data`: `Object` - An object containing which operations were `successful` and those that `failed`.
 
        ```javascript
        {
         success:Boolean,
         data:{
-          expenses:[expense],
-          failed:[expense]
+          successful:Object,
+          failed:Object
         },
         message:String
        }
@@ -194,72 +258,36 @@ The app uses jwt for user authentification, so once you register or login a user
 3. **Delete an expense**:
 
    - **method:** `DELETE`
-   - **path**: `/api/user/expenses/delete/:id`
-   - **body:** `empty`
+   - **path**: `/api/user/expenses/delete`
+   - **body:** `id`:`String` _or_ `ids`:`[String]`- A `String` containing the `id` of the expense you want to delete _or_ an `Array` of `ids`.
    - **response:**
 
      - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
      - `message`:`String` - A string with the necessary message.
-     - `data`: `Object` - An empty object.
+     - `data`: `Object` - An object containing which operations were `successful` and those that `failed`.
 
        ```javascript
        {
         success:Boolean,
-        data:Object,
-        message:String
+        message:String,
+        data:{
+          successful:Object,
+          failed:Object
+          }
        }
        ```
 
-## Trash
-
-1. **Clear trash**:
-
-   - **method:** `DELETE`
-   - **path:** `/api/user/trash/clear`
-   - **body:** `empty`
-   - **response:**
-
-     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
-     - `message`:`String` - A string with the necessary message.
-     - `data`: `Object` - An empty object
-
-       ```javascript
-       {
-        success:Boolean,
-        data:Object,
-        message:String
-       }
-       ```
-
-2. **Restore expense from trash**:
-
-   - **method:** `POST`
-   - **path:** `/api/user/trash/restore/:id`
-   - **body:** `empty`
-   - **response:**
-
-     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
-     - `message`:`String` - A string with the necessary message.
-     - `data`: `Object` - An empty object
-
-       ```javascript
-       {
-        success:Boolean,
-        data:Object,
-        message:String
-       }
-       ```
-
-3. **Fetch all expenses**:
+4. **Fetch all expenses**:
 
    - **method:** `GET`
    - **path**: `/api/user/expenses`
    - **body:** `empty`
+   - **params** `optional` - `limit` a `Number` containing how many expenses you want to fetch
    - **response:**
 
      - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
      - `message`:`String` - A string with the necessary message.
-     - `data`: `Array` - An array containing all the users expenses
+     - `data`: `Array` - An array containing `all` the users expenses
 
        ```javascript
        {
@@ -269,7 +297,7 @@ The app uses jwt for user authentification, so once you register or login a user
        }
        ```
 
-4. **Fetch an expense**:
+5. **Fetch an expense**:
 
    - **method:** `GET`
    - **path**: `/api/user/expenses/:id`
@@ -285,6 +313,114 @@ The app uses jwt for user authentification, so once you register or login a user
         success:Boolean,
         data:Object,
         message:String
+       }
+       ```
+
+## Failed
+
+1. **Fetch failed expenses**:
+
+   - **method:** `GET`
+   - **path**: `/api/user/expenses/failed`
+   - **body:** `empty`
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Array` - An array containing the `failed` expenses. These are expenses that failed to be added to the other expenses for various reasons.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Array
+        }
+       ```
+
+1. **Delete failed expense**:
+
+   - **method:** `DELETE`
+   - **path**: `/api/user/expenses/failed/delete`
+   - **body:** `id`:`String` _or_ `ids`:`[String]`- A `String` containing the `id` of the expense you want to delete _or_ an `Array` of `ids`.
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing which operations were `successful` and those that `failed`.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:{
+          successful:Object,
+          failed:Object
+          }
+       }
+       ```
+
+## Trash
+
+1. **Delete an expense from trash**:
+
+   - **method:** `DELETE`
+   - **path**: `/api/user/trash/delete`
+   - **body:** `id`:`String` _or_ `ids`:`[String]`- A `String` containing the `id` of the expense you want to delete _or_ an `Array` of `ids`.
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing which operations were `successful` and those that `failed`.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:{
+          successful:Object,
+          failed:Object
+          }
+       }
+       ```
+
+2. **Restore expense from trash**:
+
+   - **method:** `POST`
+   - **path:** `/api/user/trash/restore`
+   - **body:** `id`:`String` _or_ `ids`:`[String]` - A `String` containing the `id` of the expense you want to restore or an `Array` of `ids`.
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing which operations were `successful` and those that `failed`.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:{
+          successful:Object,
+          failed:Object
+        }
+       }
+       ```
+
+3. **Fetch trash**:
+
+   - **method:** `GET`
+   - **path:** `/api/user/trash`
+   - **body:** `empty`
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Array` - An array containing all the expenses in `trash`
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Array
        }
        ```
 
@@ -312,7 +448,49 @@ The app uses jwt for user authentification, so once you register or login a user
 
 ## Budget
 
-1. **Fetch user budget**:
+1. **Set user budget**:
+
+   - **method:** `POST`
+   - **path**: `/api/user/budget/set`
+   - **body:**
+
+     - `tite`: `String` - The title for the user dictionary,
+     - `total`:`Number` - The max amount of the user budget.
+     - `duration`: `Object` - An object containing the `start` and `end` of the budget duration.
+     - `items`: `Object` - An object containing budget items and their `total` (max) value, nested items are added to the `parents` items object.
+
+       ```javascript
+       {
+         title:String,
+         total:Number
+         duration:{
+           start:Date,
+           end:Date
+         },
+         items:{
+          label:{
+            total:Number
+            items:{...nested values}
+          }
+         },
+       }
+       ```
+
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - The set user budget, complete with its `current` amount.
+
+       ```javascript
+       {
+        success:Boolean,
+        data:Object,
+        message:String
+       }
+       ```
+
+2. **Fetch user budget**:
 
    - **method:** `GET`
    - **path**: `/api/user/budget`
@@ -323,63 +501,18 @@ The app uses jwt for user authentification, so once you register or login a user
      - `message`:`String` - A string with the necessary message.
      - `data`: `Object` - An object containing the users budget.
 
-       -`items`: `Array` - An array containing objects of budget items with their name and amount.
-
        ```javascript
        {
         success:Boolean,
         data:{
           title:String,
-          amount:{
-            current:Number,
-            total:Number
-          }
+          current:Number,
+          total:Number
           duration:{
             start:Date,
             end:Date
           },
-          items:[{id:String, amount:{current:Number, total:Number}}],
         },
-        message:String
-       }
-       ```
-
-2. **Set user budget**:
-
-   - **method:** `POST`
-   - **path**: `/api/user/budget/set`
-   - **body:**
-
-     - `tite`: `String` - The title for the user dictionary,
-     - `amount`:`Object` - An object containing the `current` amount and `total`(max) amount of the user budget.
-     - `duration`: `Object` - An object containing the `start` and `end` of the budget duration.
-     - `items`: `Array` - An array of objects containing budget items, their labels and amounts.
-
-       ```javascript
-       {
-         title:String,
-         amount:{
-           current:Number,
-           total:Number
-         }
-         duration:{
-           start:Date,
-           end:Date
-         },
-         items:[{label:String, amount:{current:Number, total:Number}}],
-       }
-       ```
-
-   - **response:**
-
-     - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
-     - `message`:`String` - A string with the necessary message.
-     - `data`: `Object` - An empty object
-
-       ```javascript
-       {
-        success:Boolean,
-        data:Object,
         message:String
        }
        ```
@@ -388,33 +521,20 @@ The app uses jwt for user authentification, so once you register or login a user
 
    - **method:** `PUT`
    - **path**: `/api/user/budget/update`
-   - **body:** An object containing whatever `part` of the budget you want to update. You can also update `nested values` by referencing them directly(e.g `duration.start`:`newDate`).
+   - **body:** An object containing whatever `part` of the budget you want to update. You can also update `nested values` by referencing them directly(e.g `duration.start`:`newDate`). `Items` are **not** updated using this path.
 
-     - `tite`: `String` - The title for the user dictionary,
-     - `amount`:`Object` - An object containing the `current` amount and `total`(max) amount of the user budget.
-     - `duration`: `Object` - An object containing the `start` and `end` of the budget duration.
-     - `items`: `Array` - An array of objects containing budget items, their labels and amounts.
-
-       ```javascript
-       {
-         title:String,
-         amount:{
-           current:Number,
-           total:Number
-         }
-         duration:{
-           start:Date,
-           end:Date
-         },
-         items:[{label:String, amount:{current:Number, total:Number}}],
-       }
-       ```
+     ```javascript
+     {
+       //Whatever part of the budget you want to update
+       //IMPORTANT: items are not updated here
+     }
+     ```
 
    - **response:**
 
      - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
      - `message`:`String` - A string with the necessary message.
-     - `data`: `Object` - An empty object
+     - `data`: `Object` - An object containing the `parts` updated.
 
        ```javascript
        {
@@ -446,16 +566,19 @@ The app uses jwt for user authentification, so once you register or login a user
 5. **Add budget item**:
 
    - **method:** `POST`
-   - **path**: `/api/user/budget/items/add`
+   - **path**: `/api/user/budget/items/add/*`
+
+     - `*`: `path` - The path where you want to add the budget item. E.g `/` adds the item to the `base` buget path, `/transport` adds the item into the heirachy of `/transport` items.
+
    - **body:**
 
-     - `label`: `String` - A string containing a label separated by commas(e.g "transport,taxi"),
-     - `amount`:`Object` - An object with the current and total amount of the budget item.
+     - `label`: `String` - A string containing a `single` label.,
+     - `total`:`Number` - A number containing total amount of the budget item.
 
        ```javascript
        {
         label:String,
-        amount:{current:Number, total:Number}
+        total:Number
        }
        ```
 
@@ -463,7 +586,7 @@ The app uses jwt for user authentification, so once you register or login a user
 
      - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
      - `message`:`String` - A string with the necessary message.
-     - `data`: `Object` - An empty object
+     - `data`: `Object` - The added budget item along with it's current amount
 
        ```javascript
        {
@@ -476,27 +599,23 @@ The app uses jwt for user authentification, so once you register or login a user
 6. **Update budget item**:
 
    - **method:** `PUT`
-   - **path**: `/api/user/budget/items/update?id={item_label} | label=${item_label}`
-   - **body:** An object containing the `part` of the budget item that you intend to update (e.g {"amount.current":20} or {"amount":{current:0, total:200}}). You can also update the item label by passing in a `label` or `id` value.
+   - **path**: `/api/user/budget/items/update/*`
 
-     - `label` | `id`: `String` - Pass this in if you intend to update the item label. A string containing a label separated by commas(e.g `"transport,taxi"`),
-     - `amount`:`Object` | `Number` - An object with the `current` and `total` amount of the budget item, or you can update individual values by passing in a string `amount.current` || `amount.total` and assigning them to a `number` value.
+     - `*`: `path` - The path of the item you want to `update`. E.g `/transport` updates the `transport` budget item.
 
-       ```javascript
-       {
-        label:String,
-        amount:{current:Number, total:Number}
+   - **body:** An object containing the `part` of the budget item that you intend to update. Either the `total` || the `current` or `both`.
 
-        //You can also use the following syntax to update an individual value:
-        //"amount.current":Number
-       }
-       ```
+     ```javascript
+     {
+       //Whatever part of the budget item you want to update
+     }
+     ```
 
    - **response:**
 
      - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
      - `message`:`String` - A string with the necessary message.
-     - `data`: `String` - An empty object
+     - `data`: `String` - An object containing the `part` of the budget item that's been updated.
 
        ```javascript
        {
@@ -509,7 +628,10 @@ The app uses jwt for user authentification, so once you register or login a user
 7. **Delete budget item**:
 
    - **method:** `DELETE`
-   - **path**: `/api/user/budget/items/delete?id={item_label} | label={item_label}`
+   - **path**: `/api/user/budget/items/delete/*`
+
+     - `*`: `path` - The path of the item you want to `delete`. E.g `/transport` deletes the `transport` budget item and `all` its `nested` items.
+
    - **body:** `empty`
    - **response:**
 
@@ -527,16 +649,18 @@ The app uses jwt for user authentification, so once you register or login a user
 
 ## Dictionary
 
+The dictionary is used to automatically assign labels based on an `exact match` of the expense `recipient`.
+
 1. **Fetch user dictionary**:
 
 - **method:** `GET`
-- **path:** `/api/user/dictionary`
+- **path:** `/api/user/dictionary` -`optional`: `?labels-only=true` - only return an array of the labels from each entry.
 - **body:** `empty`
 - **response:**
 
   - `success`: `Boolean` - A boolean indicating wether the operation was successfull or not,
   - `message`:`String` - A string with the necessary message.
-  - `data`: `Array` - An array of all the entries in the user dictionary
+  - `data`: `Array` - An array of all the entries in the user dictionary. If `labels-only=true` then it will only return the labels from each entry.
 
     ```javascript
     {
@@ -545,3 +669,191 @@ The app uses jwt for user authentification, so once you register or login a user
      message:String
     }
     ```
+
+2. **Add an entry to the dictionary**:
+
+   - **method:** `POST`
+   - **path**: `/api/user/dictionary/add`
+   - **body:**
+
+     - `entry` _or_ `id` : `String` - A string containing the expense receipient.
+     - `labels`: `Array` - An array containing a `heirachy` of labels. E.g `["transport", "taxi"]`.
+
+     ```javascript
+     {
+      entry | id:String,
+      labels:[String]
+     }
+     ```
+
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing the dictionary entry.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```
+
+3. **Update a dictionary entry**:
+
+   - **method:** `PUT`
+   - **path**: `/api/user/dictionary/update{?id={entryId} || ?entry={entryId}}`
+   - **body:**
+
+     - `optional` - `entry` _or_ `id` : `String` - A string containing the dictionary entry id.
+     - `labels`: `Array` - An array containing the `new` heirachy of labels. E.g `["transport", "taxi"]`.
+
+     ```javascript
+     {
+       //(optional) entry || id:String,
+       labels: [String];
+     }
+     ```
+
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing the dictionary entry.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```
+
+4. **Delete a dictionary entry**:
+
+   - **method:** `DELETE`
+   - **path**: `/api/user/dictionary/delete{?id={entryId} || ?entry={entryId}}`
+   - **body:**
+
+     - _optional_ `entry` _or_ `id` : `String` - A string containing the dictionary entry id.
+     - `labels`: `Array` - An array containing a `heirachy` of labels. E.g `["transport", "taxi"]`.
+
+     ```javascript
+     {
+       // (optional) entry | id:String,
+       labels: [String];
+     }
+     ```
+
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing the dictionary entry.
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```
+
+## Keywords
+
+Keywords are used for automatically labeling expenses with a given `keyword` in their `recipient`.
+
+1. **Add a keyword**:
+
+   - **method:** `POST`
+   - **path**: `/api/user/keywords/add`
+   - **body:**
+
+     - `keyword` : `String` - A string containing the keyword.
+     - `labels`: `Array` - An array containing a `heirachy` of labels. E.g `["transport", "taxi"]`.
+     - _optional_ `updateAllExpenses`: `Boolean` - A boolean that decides whether all existing expenses with the keyword will be updated.
+
+     ```javascript
+     {
+       keyword: String;
+       labels: [String];
+       //(optional) updateAllExpenses:Boolean
+     }
+     ```
+
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing the keyword and labels
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```
+
+2. **Upadate a keyword**:
+
+   - **method:** `PUT`
+   - **path**: `/api/user/keywords/update?keyword={String}`
+   - **body:**
+
+     - _optional_ `keyword` : `String` - A string containing the keyword.
+     - `labels`: `Array` - An `new` array containing a `heirachy` of labels. E.g `["transport", "taxi"]`.
+     - _optional_ `updateAllExpenses`: `Boolean` - A boolean that decides whether all existing expenses with the keyword will be updated.
+
+     ```javascript
+     {
+       //(optional) keyword: String;
+       labels: [String];
+       //(optional) updateAllExpenses:Boolean
+     }
+     ```
+
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An object containing the keyword and labels
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```
+
+3. **Delete a keyword**:
+
+   - **method:** `DELETE`
+   - **path**: `/api/user/keywords/delete?keyword={keyword}`
+   - **body:**
+
+     - _optional_ `keyword` : `String` - A string containing the keyword.
+     - _optional_ `updateAllExpenses`: `Boolean` - A boolean that decides whether all existing expenses with the keyword will be updated.
+
+     ```javascript
+     {
+       //(optional) keyword: String;
+       //(optional) updateAllExpenses:Boolean
+     }
+     ```
+
+   - **response:**
+
+     - `success`: `Boolean` - A boolean indicating whether the operation was successfull or not,
+     - `message`:`String` - A string with the necessary message.
+     - `data`: `Object` - An empty object
+
+       ```javascript
+       {
+        success:Boolean,
+        message:String,
+        data:Object
+       }
+       ```

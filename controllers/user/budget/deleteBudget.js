@@ -5,7 +5,7 @@ const removeFromCache = require("../../../utils/redis/removeFromCache");
 module.exports = async (req, res, next) => {
   try {
     //invalidate budget cache
-    removeFromCache(`budget:${req.user.id}:*`);
+    removeFromCache(`${req.user.id}:budget*`);
     const batch = db.batch();
     await deleteSubCollections(
       db.collection("users").doc(req.user.id).collection("budget").doc(`info`),

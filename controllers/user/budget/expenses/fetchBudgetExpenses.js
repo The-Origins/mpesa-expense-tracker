@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
   try {
     let expenses;
 
-    const cacheKey = `expenses:${req.user.id}:budget:`;
+    const cacheKey = `${req.user.id}:budget:expenses`;
     const cachedBudgetExpenses = await client.get(cacheKey);
 
     if (cachedBudgetExpenses) {

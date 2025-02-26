@@ -1,5 +1,8 @@
+const db = require("../../../config/db");
+const removeFromCache = require("../../../utils/redis/removeFromCache");
+const addExpense = require("../../../utils/user/expenses/addExpense");
+const deleteExpenses = require("../../../utils/user/expenses/deleteExpenses");
 const addFailedExpenses = require("../../../utils/user/expenses/failed/addFailedExpenses");
-const restoreExpenses = require("../../../utils/user/trash/restoreExpenses");
 
 module.exports = async (req, res, next) => {
   try {
@@ -10,11 +13,44 @@ module.exports = async (req, res, next) => {
       throw new error(`Invalid input`);
     }
 
-    const operations = await restoreExpenses(ids, req.user, req.budget);
+    const operation = async (
+      doc,
+      batch,
+      writes,
+      invalidatedKeys,
+      operations
+    ) => {
+      await addExpense(
+        db
+          .collection("users")
+          .doc(req.user.id)
+          .collection(`expenses`)
+          .doc(doc.id),
+        doc.data(),
+        operations,
+        req.user,
+        req.budget,
+        invalidatedKeys,
+        batch,
+        writes
+      );
+    };
+
+    const operations = await deleteExpenses(
+      ids,
+      db.collection("users").doc(req.user.id).collection("trash"),
+      operation
+    );
+
+    if (operations.successful.length) {
+      removeFromCache(`${req.user.id}:expenses`);
+    }
 
     if (operations.failed.length) {
       await addFailedExpenses(operations.failed, req.user);
     }
+
+    removeFromCache(`${req.user.id}:trash`)
 
     res.json({
       success: !operations.failed.length,

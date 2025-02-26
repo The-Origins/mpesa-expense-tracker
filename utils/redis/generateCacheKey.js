@@ -1,26 +1,28 @@
-module.exports = (req, prefix) => {
-  let query = "";
+module.exports = (req, key) => {
+  let queries = "";
   const queryKeys = Object.keys(req.query || {});
   if (queryKeys.length) {
-    if (queryKeys.length > 1) {
-      //normalize the order
-      query =
-        ":" +
-        JSON.stringify(
-          queryKeys.sort().reduce((obj, key) => {
-            obj[key] = req.query[key];
-            return obj;
-          }, {})
-        );
-    } else {
-      query = ":" + JSON.stringify(req.query);
-    }
+    queries = parseObj(queryKeys, req.query);
   }
 
   let params = "";
-  if (req.params && Object.keys(req.params).length) {
-    params = ":" + JSON.stringify(req.params);
+  const paramKeys = Object.keys(req.params || {});
+  if (paramKeys.length) {
+    params = parseObj(paramKeys, req.params, false);
   }
 
-  return `${prefix}:${req.user.id}${params}${query}:`;
+  const output = `${req.user.id}:${key}${params}${queries}`;
+  console.log(output);
+  return output;
+};
+
+const parseObj = (keys, obj, sort = true) => {
+  let output = "";
+  if (sort) {
+    keys = keys.sort();
+  }
+  keys.forEach((key) => {
+    output += `:${key}:${obj[key]}`;
+  });
+  return output;
 };

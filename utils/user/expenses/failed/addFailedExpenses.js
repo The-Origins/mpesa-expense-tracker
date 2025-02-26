@@ -24,5 +24,5 @@ module.exports = async (failed, user) => {
 
   await batch.commit();
   //invalidate failed cache
-  removeFromCache(`failed:${user.id}:*`);
+  removeFromCache(`${user.id}:expenses:failed*`);
 };

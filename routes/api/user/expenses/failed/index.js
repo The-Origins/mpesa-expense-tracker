@@ -8,7 +8,7 @@ router.get(
 
 router.delete(
   "/delete/:id",
-  require("../../../../../controllers/user/expenses/failed/deleteFailedExpense")
+  require("../../../../../controllers/user/expenses/failed/deleteFailedExpenses")
 );
 
 module.exports = router;

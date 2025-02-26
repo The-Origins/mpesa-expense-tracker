@@ -65,7 +65,7 @@ fetchLabels = async (expense, user) => {
       expense.keyword = data.keyword;
     }
   } else {
-    const cachedKeywords = await client.get(`keywords:${user.id}:`);
+    const cachedKeywords = await client.get(`${user.id}:keywords`);
 
     if (cachedKeywords) {
       for (let item of JSON.parse(cachedKeywords)) {

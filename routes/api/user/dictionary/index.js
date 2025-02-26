@@ -6,4 +6,6 @@ router.get(
   require("../../../../controllers/user/dictionary/fetchDictionary")
 );
 
+router.use("/entry", require("./entry"));
+
 module.exports = router;

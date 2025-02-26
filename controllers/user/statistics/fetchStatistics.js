@@ -5,8 +5,8 @@ const getPathStatistics = require("../../../utils/user/statistics/getDocStatisti
 module.exports = async (req, res, next) => {
   try {
     let statistics = {};
-    if (req.cachedData?.statistics) {
-      statistics = req.cachedData.statistics;
+    if (req.cachedData) {
+      statistics = req.cachedData;
     } else {
       const path = `users/${req.user.id}/statistics/all${req.path}`;
       const pathDoc = db.doc(path);
@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
       await getPathStatistics(pathDoc, statistics, 0, 2);
 
       //add to cache
-      addToCache(req.cacheKey, { statistics });
+      addToCache(req.cacheKey, statistics);
     }
     res.json({
       success: true,

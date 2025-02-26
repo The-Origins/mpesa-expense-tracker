@@ -3,10 +3,11 @@ const removeFromCache = require("../redis/removeFromCache");
 
 module.exports = async (res, id, refresh, operation="set") => {
   //add refresh token to cache for validation
+  const cacheKey = `${id}:tokens`
   if (operation === "set") {
-    await addToCache(`tokens:${id}:`, refresh.token, refresh.expiresIn);
+    await addToCache(cacheKey, refresh.token, refresh.expiresIn);
   } else {
-    await removeFromCache(`tokens:${id}`);
+    await removeFromCache(cacheKey);
   }
 
   // add to http only cookie

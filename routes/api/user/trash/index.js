@@ -6,7 +6,7 @@ router.get(
   require("../../../../middleware/redis/getCachedData"),
   require("../../../../controllers/user/trash/fetchTrash")
 );
-router.delete("/clear", require("../../../../controllers/user/trash/clear"));
+router.delete("/delete", require("../../../../controllers/user/trash/delete"));
 router.post(
   "/restore",
   require("../../../../middleware/user/budget/getBudget"),

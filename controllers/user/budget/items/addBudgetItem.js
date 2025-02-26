@@ -47,7 +47,7 @@ module.exports = async (req, res, next) => {
 
     await batch.commit();
 
-    removeFromCache(`budget:${req.user.id}:items:*`);
+    removeFromCache(`${req.user.id}:budget:items*`);
 
     res.json({
       success: true,

@@ -4,7 +4,8 @@ const addToCache = require("../../../utils/redis/addToCache");
 
 module.exports = async (req, res, next) => {
   try {
-    const cachedBudget = await client.get(`budget:${req.user.id}:`);
+    const cacheKey = `${req.user.id}:budget`
+    const cachedBudget = await client.get(cacheKey);
 
     if (cachedBudget) {
       req.budget = JSON.parse(cachedBudget);
@@ -18,7 +19,7 @@ module.exports = async (req, res, next) => {
 
       if (budget.exists) {
         const data = budget.data();
-        addToCache(`budget:${req.user.id}:`, data);
+        addToCache(cacheKey, data);
         req.budget = data;
       }
     }

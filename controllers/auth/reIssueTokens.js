@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
       process.env.public_key.replace(/\\n/g, "\n")
     );
 
-    const cacheKey = `tokens:${refreshPayload.sub}`;
+    const cacheKey = `${refreshPayload.sub}:tokens`;
     const userToken = JSON.parse(await client.get(cacheKey));
 
     if (

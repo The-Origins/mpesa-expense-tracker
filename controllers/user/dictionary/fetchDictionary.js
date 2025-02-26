@@ -5,7 +5,7 @@ module.exports = async (req, res, next) => {
   try {
     let dictionary = [];
     if (req.cachedData) {
-      dictionary = req.cachedData.dictionary;
+      dictionary = req.cachedData;
     } else {
       const dictionaryRef = db
         .collection("users")
@@ -14,9 +14,15 @@ module.exports = async (req, res, next) => {
 
       const dictionaryDocs = await dictionaryRef.get();
 
-      dictionary = dictionaryDocs.docs.map((d) => d.data().labels);
+      dictionary = dictionaryDocs.docs.map((doc) => {
+        const data = doc.data();
+        if (req.query?.["labels-only"]) {
+          return data.labels;
+        }
+        return { id: doc.id, ...data };
+      });
 
-      addToCache(req.cacheKey, { dictionary });
+      addToCache(req.cacheKey, dictionary);
     }
     res.json({
       success: true,
